@@ -3,7 +3,7 @@ import { Sequelize } from 'sequelize';
 
 dotenv.config();
 
-const sequelize = new Sequelize(
+export const sequelize = new Sequelize(
     process.env.PGDATABASE,
     process.env.PGUSER,
     process.env.PGPASSWORD,
@@ -30,4 +30,4 @@ const connectPostgres = async () => {
     }
 };
 
-export { sequelize, connectPostgres };
+export default connectPostgres;

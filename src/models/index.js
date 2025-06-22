@@ -1,8 +1,8 @@
-import User from './userModel';
-import Vehicle from './vehicleModel';
-import VehicleDiagnostic from './vehicleDiagnosticModel';
-import AutoRepairShop from './autoRepairShopModel';
-import MechanicRequest from './mechanicRequestModel';
+import User from './userModel.js';
+import Vehicle from './vehicleModel.js';
+import VehicleDiagnostic from './vehicleDiagnosticModel.js';
+import AutoRepairShop from './autoRepairShopModel.js';
+import MechanicRequest from './mechanicRequestModel.js';
 
 User.hasMany(Vehicle, { foreignKey: 'user_id' });
 Vehicle.belongsTo(User, { foreignKey: 'user_id' });

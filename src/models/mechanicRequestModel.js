@@ -9,6 +9,7 @@ const MechanicRequest = sequelize.define('mechanic_request', {
     request_datetime: { type: DataTypes.DATE, allowNull: false },
     status: { type: DataTypes.STRING(20), allowNull: false },
 }, {
+    tableName: 'mechanic_request',
     timestamps: false,
 });
 

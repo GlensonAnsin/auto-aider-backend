@@ -7,12 +7,13 @@ const User = sequelize.define('user', {
     lastname: { type: DataTypes.STRING(50), allowNull: false },
     gender: { type: DataTypes.STRING(10), allowNull: false },
     email: { type: DataTypes.STRING(100), unique: true },
-    mobile_num: { type: DataType.STRING(20), unique: true, allowNull: true },
+    mobile_num: { type: DataTypes.STRING(20), unique: true, allowNull: true },
     password: { type: DataTypes.STRING(255), allowNull: false },
     creation_date: { type: DataTypes.DATEONLY, allowNull: false },
     profile_pic: { type: DataTypes.TEXT },
     role: { type: DataTypes.STRING(20), allowNull: false },
 }, {
+    tableName: 'user',
     timestamps: false,
 });
 

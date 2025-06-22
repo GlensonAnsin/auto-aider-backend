@@ -21,6 +21,7 @@ const AutoRepairShop = sequelize.define('auto_repair_shop', {
     average_rating: { type: DataTypes.DECIMAL },
     approval_status: { type: DataTypes.STRING(20) },
 }, {
+    tableName: 'auto_repair_shop',
     timestamps: false,
 });
 
