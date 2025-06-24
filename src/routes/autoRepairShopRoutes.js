@@ -3,7 +3,7 @@ import { getAllRepairShops, createRepairShop } from '../controllers/autoRepairSh
 
 const router = express.Router();
 
-router.post('/', createRepairShop);
-router.get('/', getAllRepairShops);
+router.post('/signup', createRepairShop);
+router.get('/get-all', getAllRepairShops);
 
 export default router;
