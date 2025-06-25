@@ -1,10 +1,11 @@
-import { User } from '../models/index.js';
+import { User, Vehicle, VehicleDiagnostic, MechanicRequest } from '../models/index.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
+// GET ALL USERS
 export const getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll();
@@ -14,6 +15,24 @@ export const getAllUsers = async (req, res) => {
     }
 };
 
+// GET USER INFO
+export const getUserInfo = async (req, res) => {
+    const { id } = req.body;
+
+    try {
+        const userDetail = await User.findOne({ where: { user_id: id } });
+        const { password: _, ...userWithoutPassword } = userDetail.toJSON();
+        res.json({
+            message: 'Request successful',
+            userWithoutPassword
+        });
+
+    } catch (e) {
+        res.status(401).json({ message: 'Unauthorized' });
+    }
+}
+
+// SIGNUP
 export const createUser = async (req, res) => {
     try {
         const { firstname, lastname, gender, email, mobile_num, password, creation_date, profile_pic, role } = req.body;
@@ -37,20 +56,21 @@ export const createUser = async (req, res) => {
     }
 };
 
+// LOGIN
 export const loginUser = async (req, res) => {
-    const { mobile_num, password } = req.body;
+    const { username, password } = req.body;
 
     try {
-        const user = await User.findOne({ where:  mobile_num  });
+        const user = await User.findOne({ where: { mobile_num: username } });
 
         if (!user) {
-            return res.status(401).json({ message: 'Invalid email or password' });
+            return res.status(401).json({ message: 'Invalid credentials' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(401).json({ message: 'Invalid email or password' });
+            return res.status(401).json({ message: 'Invalid credentials' });
         }
 
         const accessToken = jwt.sign(
@@ -80,6 +100,7 @@ export const loginUser = async (req, res) => {
     }
 };
 
+// REFRESH TOKEN
 export const refreshAccessToken = async (req, res) => {
     const { refreshToken } = req.body;
 

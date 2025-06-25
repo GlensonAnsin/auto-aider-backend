@@ -15,7 +15,6 @@ app.use(cors());
 app.use(express.json());
 
 await connectPostgres();
-await connectMongo();
 
 app.get('/', (req, res) => {
     res.send('Server is running.')
