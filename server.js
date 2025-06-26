@@ -5,6 +5,7 @@ import connectPostgres from './src/config/postgresDB.js';
 import connectMongo from './src/config/mongoDB.js';
 import userRoutes from './src/routes/userRoutes.js';
 import autoRepairShopRoutes from './src/routes/autoRepairShopRoutes.js'
+import vehicleRoutes from './src/routes/vehicleRoutes.js'
 
 const app = express();
 const port = process.env.PORT;
@@ -22,5 +23,6 @@ app.get('/', (req, res) => {
 
 app.use('/api/user', userRoutes);
 app.use('/api/auto_repair_shop', autoRepairShopRoutes);
+app.use('/api/vehicle');
 
 app.listen(port, () => console.log(`Server is  running on http://192.168.0.111:${port}`));
