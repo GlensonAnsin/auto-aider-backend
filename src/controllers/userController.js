@@ -45,14 +45,12 @@ export const getAllUsers = async (req, res) => {
 
 // GET USER INFO
 export const getUserInfo = async (req, res) => {
-    const { id } = req.body;
+    const user_id = req.user.user_id;
 
     try {
-        const userDetail = await User.findOne({ where: { user_id: id } });
+        const userDetail = await User.findOne({where: { user_id: user_id } });
 
-        const { password: _, ...userWithoutPassword } = userDetail.toJSON();
-
-        res.status(200).json(userWithoutPassword);
+        res.status(200).json(userDetail);
 
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -103,20 +101,19 @@ export const loginUser = async (req, res) => {
 
 // UPDATE USER INFO
 export const updateUserInfo = async (req, res) => {
-    const { user_id, firstname, lastname, gender, email, mobile_num } = req.body;
+    const user_id = req.user.user_id;
+    const { firstname, lastname, gender, email, mobile_num, profile_pic } = req.body;
 
     try {
-        const user = await User.findOne({
-            where: { user_id: user_id },
-            attributes: ['firstname', 'lastname', 'gender', 'email', 'mobile_num'],
-        });
+        const user = await User.findOne({ where: { user_id: user_id } });
 
         const updatedUserInfo = await user.update({
-            firstname: firstname,
-            lastname: lastname,
-            gender: gender,
-            email: email,
-            mobile_num: mobile_num
+            firstname,
+            lastname,
+            gender,
+            email,
+            mobile_num,
+            profile_pic
         });
 
         res.status(201).json(updatedUserInfo);
@@ -142,26 +139,6 @@ export const changePass = async (req, res) => {
         });
 
         res.status(201).json(updatedPassword);
-
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-};
-
-export const updateProfilePic = async (req, res) => {
-    const { user_id, profile_pic } = req.body;
-
-    try {
-        const user = await User.findOne({
-            where: { user_id: user_id },
-            attributes: ['profile_pic'],
-        });
-
-        const updatedProfilePic = await user.update({
-            profile_pic: profile_pic
-        });
-
-        res.status(201).json(updatedProfilePic);
 
     } catch (e) {
         res.status(500).json({ error: e.message });

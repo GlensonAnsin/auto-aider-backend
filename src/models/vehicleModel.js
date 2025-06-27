@@ -7,6 +7,7 @@ const Vehicle = sequelize.define('vehicle', {
     make: { type: DataTypes.STRING(50), allowNull: false },
     model: { type: DataTypes.STRING(50), allowNull: false },
     year: { type: DataTypes.STRING(4), allowNull: false },
+    date_added: { type: DataTypes.DATEONLY, allowNull: false },
 }, {
     tableName: 'vehicle',
     timestamps: false,

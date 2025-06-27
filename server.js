@@ -23,6 +23,6 @@ app.get('/', (req, res) => {
 
 app.use('/api/user', userRoutes);
 app.use('/api/auto_repair_shop', autoRepairShopRoutes);
-app.use('/api/vehicle');
+app.use('/api/vehicle', vehicleRoutes);
 
 app.listen(port, () => console.log(`Server is  running on http://192.168.0.111:${port}`));

@@ -12,7 +12,7 @@ export const authMiddleware = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN);
-        req.user =decoded;
+        req.user = decoded;
         next();
 
     } catch (e) {

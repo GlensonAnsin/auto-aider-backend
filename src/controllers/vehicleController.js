@@ -2,14 +2,16 @@ import { Vehicle } from "../models/index.js";
 
 // ADD VEHICLE
 export const addVehicle = async (req, res) => {
-    const { user_id, make, model, year } = req.body;
+    const user_id = req.user.user_id;
+    const { make, model, year, date_added } = req.body;
 
     try {
         const vehicle = await Vehicle.create({
             user_id,
             make,
             model,
-            year
+            year,
+            date_added
         });
 
         res.status(201).json(vehicle)
