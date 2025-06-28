@@ -4,19 +4,42 @@ import cors from 'cors';
 import connectPostgres from './src/config/postgresDB.js';
 import connectMongo from './src/config/mongoDB.js';
 import userRoutes from './src/routes/userRoutes.js';
-import autoRepairShopRoutes from './src/routes/autoRepairShopRoutes.js'
-import vehicleRoutes from './src/routes/vehicleRoutes.js'
+import autoRepairShopRoutes from './src/routes/autoRepairShopRoutes.js';
+import vehicleRoutes from './src/routes/vehicleRoutes.js';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 
 const app = express();
-const port = process.env.PORT;
+const httpServer = createServer(app);
 
+// SOCKET
+const io = new Server(httpServer, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST', 'DELETE', 'PATCH']
+    }
+});
+
+io.on('connection', (socket) => {
+    console.log('A user connected: ', socket.id);
+});
+
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+});
+
+// ENV VAR
 dotenv.config();
 
+// MIDDLEWARES
 app.use(cors());
 app.use(express.json());
 
+// DATABASE CONNECTION
 await connectPostgres();
 
+// ROUTES
 app.get('/', (req, res) => {
     res.send('Server is running.')
 });
@@ -25,4 +48,8 @@ app.use('/api/user', userRoutes);
 app.use('/api/auto_repair_shop', autoRepairShopRoutes);
 app.use('/api/vehicle', vehicleRoutes);
 
-app.listen(port, () => console.log(`Server is  running on http://192.168.0.111:${port}`));
+// START SERVER
+const port = process.env.PORT || 3000;
+httpServer.listen(port, () => {
+    console.log(`Server is running on http://192.168.0.111:${port}`);
+});

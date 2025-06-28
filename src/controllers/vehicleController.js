@@ -23,7 +23,7 @@ export const addVehicle = async (req, res) => {
 
 // RETRIEVE VEHICLE
 export const getVehicles = async (req, res) => {
-    const { user_id } = req.body;
+    const user_id = req.user.user_id;
 
     try {
         const userVehicle = await Vehicle.findAll({ where: { user_id: user_id} });
@@ -35,37 +35,17 @@ export const getVehicles = async (req, res) => {
     }
 };
 
-// UPDATE VEHICLE
-export const updateVehicle = async (req, res) => {
-    const { vehicle_id, make, model, year } = req.body;
-
-    try {
-        const userVehicle = await Vehicle.findOne({
-            where: { vehicle_id: vehicle_id },
-            attributes: ['make', 'model', 'year'],
-        });
-
-        const updatedVehicle = await userVehicle.update({
-            make: make,
-            model: model,
-            year: year
-        });
-
-        res.status(201).json(updatedVehicle);
-
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-};
-
 // REMOVE VEHICLE
 export const removeVehicle = async (req, res) => {
-    const { vehicle_id } = req.body;
+    const user_id = req.user.user_id;
+    const { vehicle_id } = req.params;
 
     try {
-        const userVehicle = await Vehicle.findOne({ where: { vehicle_id: vehicle_id } });
+        const userVehicle = await Vehicle.findOne({ where: { user_id: user_id, vehicle_id: vehicle_id } });
 
         const deletedVehicle = await userVehicle.destroy();
+
+        req.io.emit('vehicleDeleted', { vehicleID: parseInt(vehicle_id) })
 
         res.status(200).json(deletedVehicle);
 
