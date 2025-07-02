@@ -7,7 +7,7 @@ dotenv.config();
 
 // SIGNUP
 export const createUser = async (req, res) => {
-    const { firstname, lastname, gender, email, mobile_num, password, creation_date, profile_pic, role } = req.body;
+    const { firstname, lastname, gender, email, mobile_num, password, creation_date, profile_pic, role, user_initials_bg } = req.body;
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -21,7 +21,8 @@ export const createUser = async (req, res) => {
             password: hashedPassword,
             creation_date,
             profile_pic,
-            role
+            role,
+            user_initials_bg
         });
 
         res.status(201).json(user);
@@ -124,13 +125,17 @@ export const updateUserInfo = async (req, res) => {
 };
 
 export const changePass = async (req, res) => {
-    const { user_id, newPassword } = req.body;
+    const user_id = req.user.user_id;
+    const { newPassword, currentPassword } = req.body;
 
     try {
-        const user = await User.findOne({
-            where: { user_id: user_id },
-            attributes: ['password'],
-        });
+        const user = await User.findOne({ where: { user_id: user_id } });
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Wrong current password' });
+        }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 

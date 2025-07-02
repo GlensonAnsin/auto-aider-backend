@@ -12,6 +12,7 @@ const User = sequelize.define('user', {
     creation_date: { type: DataTypes.DATEONLY, allowNull: false },
     profile_pic: { type: DataTypes.TEXT },
     role: { type: DataTypes.STRING(20), allowNull: false },
+    user_initials_bg: { type: DataTypes.STRING(6), allowNull: false },
 }, {
     tableName: 'user',
     timestamps: false,
