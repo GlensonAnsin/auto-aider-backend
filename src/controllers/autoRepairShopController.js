@@ -51,6 +51,20 @@ export const getAllRepairShops = async (req, res) => {
     }
 };
 
+// GET REPAIR SHOP INFO
+export const getRepairShopInfo = async (req, res) => {
+    const repair_shop_id = req.user.repair_shop_id;
+
+    try {
+        const repairShopDetail = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
+
+        res.status(200).json(repairShopDetail);
+
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};
+
 // LOGIN REPAIR SHOP
 export const loginRepairShop = async (req, res) => {
     const { username, password } = req.body;
@@ -201,62 +215,20 @@ export const updateShopImages = async (req, res) => {
     }
 };
 
-export const updateNumberOfRatings = async (req, res) => {
-    const { repair_shop_id, rate } = req.body;
+export const updateRatings = async (req, res) => {
+    const repair_shop_id = req.user.repair_shop_id
+    const { rate, score } = req.body;
 
     try {
-        const repairShop = await AutoRepairShop.findOne({
-            where: { repair_shop_id: repair_shop_id },
-            attributes: ['number_of_ratings'],
-        });
+        const repairShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
 
-        const updatedNumberOfRatings = await repairShop.update({
-            number_of_ratings: number_of_ratings + rate
-        });
-
-        res.status(201).json(updatedNumberOfRatings);
-
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-};
-
-export const updateTotalScore = async (req, res) => {
-    const { repair_shop_id, score } = req.body;
-
-    try {
-        const repairShop = await AutoRepairShop.findOne({
-            where: { repair_shop_id: repair_shop_id },
-            attributes: ['total_score'],
-        });
-
-        const updatedTotalScore = await repairShop.update({
+        const updatedRatings = await repairShop.update({
+            number_of_ratings: number_of_ratings + rate,
+            average_rating: total_score / number_of_ratings,
             total_score: total_score + score
         });
 
-        res.status(201).json(updatedTotalScore);
-
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-};
-
-export const updateAverageRating = async (req, res) => {
-    const { repair_shop_id } = req.body;
-
-    try {
-        const repairShop = await AutoRepairShop.findOne({
-            where: { repair_shop_id: repair_shop_id },
-            attributes: ['number_of_ratings', 'average_rating', 'total_score'],
-        });
-
-        const updatedAverageRating = await repairShop.update({
-            number_of_ratings: number_of_ratings,
-            average_rating: total_score / number_of_ratings,
-            total_score: total_score
-        });
-
-        res.status(201).json(updatedAverageRating);
+        res.status(201).json(updatedRatings);
 
     } catch (e) {
         res.status(500).json({ error: e.message });
