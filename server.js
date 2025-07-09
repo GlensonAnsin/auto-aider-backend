@@ -8,6 +8,7 @@ import autoRepairShopRoutes from './src/routes/autoRepairShopRoutes.js';
 import vehicleRoutes from './src/routes/vehicleRoutes.js';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import cloudinaryRoutes from './src/routes/cloudinaryRoutes.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -47,6 +48,8 @@ app.get('/', (req, res) => {
 app.use('/api/user', userRoutes);
 app.use('/api/auto_repair_shop', autoRepairShopRoutes);
 app.use('/api/vehicle', vehicleRoutes);
+
+app.use('/api/cloudinary', cloudinaryRoutes);
 
 // START SERVER
 const port = process.env.PORT || 3000;
