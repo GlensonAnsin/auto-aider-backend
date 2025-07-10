@@ -51,6 +51,8 @@ export const getUserInfo = async (req, res) => {
     try {
         const userDetail = await User.findOne({where: { user_id: user_id } });
 
+        req.io.emit('updatedProfile', { updatedProfile: userDetail.profile_pic });
+
         res.status(200).json(userDetail);
 
     } catch (e) {
