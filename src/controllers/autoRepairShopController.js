@@ -109,109 +109,84 @@ export const loginRepairShop = async (req, res) => {
 
 // UPDATE REPAIR SHOP INFO
 export const updateRepairShopInfo = async (req, res) => {
-    const { repair_shop_id, owner_firstname, owner_lastname, gender, shop_name, mobile_num, email } = req.body;
+    const repair_shop_id = req.user.repair_shop_id;
+    const {
+        owner_firstname,
+        owner_lastname,
+        gender,
+        shop_name,
+        mobile_num,
+        email,
+        currentPassword,
+        newPassword,
+        services_offered,
+        longitude,
+        latitude,
+        profile_pic,
+        shop_images,
+        field
+    } = req.body;
 
     try {
-        const repairShop = await AutoRepairShop.findOne({
-            where: { repair_shop_id: repair_shop_id },
-            attributes: ['owner_firstname', 'owner_lastname', 'gender', 'shop_name', 'mobile_num', 'email'],
-        });
+        const repairShop = await AutoRepairShop.findOne({ where: { repair_shop_id } });
 
-        const updatedRepairShopInfo = await repairShop.update({
-            owner_firstname: owner_firstname,
-            owner_lastname: owner_lastname,
-            gender: gender,
-            shop_name: shop_name,
-            mobile_num: mobile_num,
-            email: email
-        });
+        if (!repairShop) {
+            return res.status(404).json({ error: 'Repair shop not found.' });
+        }
 
-        res.status(201).json(updatedRepairShopInfo);
+        let updateData = {};
 
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-};
+        switch (field) {
+            case 'rep-shop-name':
+                updateData.shop_name = shop_name;
+                break;
+            case 'firstname':
+                updateData.owner_firstname = owner_firstname;
+                break;
+            case 'lastname':
+                updateData.owner_lastname = owner_lastname;
+                break;
+            case 'gender':
+                updateData.gender = gender;
+                break;
+            case 'mobile-num':
+                updateData.mobile_num = mobile_num;
+                break;
+            case 'email':
+                updateData.email = email;
+                break;
+            case 'change-password':
+                const isMatch = await bcrypt.compare(currentPassword, repairShop.password);
 
-export const changePass =  async (req, res) => {
-    const { repair_shop_id, newPassword } = req.body;
+                if (!isMatch) {
+                    return res.status(401).json({ message: 'Wrong current password' });
+                }
 
-    try {
-        const repairShop = await AutoRepairShop.findOne({
-            where: { repair_shop_id: repair_shop_id },
-            attributes: ['password'],
-        });
+                updateData.password = await bcrypt.hash(newPassword, 10);
+                break;
+            case 'services-offered':
+                updateData.services_offered = services_offered;
+                break;
+            case 'region':
+                updateData.latitude = latitude;
+                updateData.longitude = longitude;
+                break;
+            case 'profile':
+                updateData.profile_pic = profile_pic;
+                break;
+            case 'shop-images':
+                updateData.shop_images = shop_images;
+                break;
+            default:
+                return res.status(400).json({ error: 'Invalid update field.' });
+        }
 
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-        const updatedPassword = await repairShop.update({
-            password: hashedPassword
-        });
-
-        res.status(201).json(updatedPassword);
-
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-};
-
-export const updateServicesOffered = async (req, res) => {
-    const { repair_shop_id, services_offered } = req.body;
-
-    try {
-        const repairShop = await AutoRepairShop.findOne({
-            where: { repair_shop_id: repair_shop_id },
-            attributes: ['services_offered'],
-        });
-
-        const updatedServicesOffered = await repairShop.update({
-            services_offered: services_offered
-        });
-
-        res.status(201).json(updatedServicesOffered);
-
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-};
-
-export const updateProfilePic = async (req, res) => {
-    const { repair_shop_id, profile_pic } = req.body;
-
-    try {
-        const repairShop = await AutoRepairShop.findOne({
-            where: { repair_shop_id: repair_shop_id },
-            attributes: ['profile_pic'],
-        });
-
-        const updatedProfilePic = await repairShop.update({
-            profile_pic: profile_pic
-        });
-
-        res.status(201).json(updatedProfilePic);
+        await repairShop.update(updateData);
+        req.io.emit('updatedRepairShopInfo', { updatedRepairShopInfo: repairShop });
+        return res.sendStatus(201);
 
     } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-};
-
-export const updateShopImages = async (req, res) => {
-    const { repair_shop_id, shop_images } = req.body;
-
-    try {
-        const repairShop = await AutoRepairShop.findOne({
-            where: { repair_shop_id: repair_shop_id },
-            attributes: ['shop_images'],
-        });
-
-        const updatedShopImages = await repairShop.update({
-            shop_images: shop_images
-        });
-
-        res.status(201).json(updatedShopImages);
-
-    } catch (e) {
-        res.status(500).json({ error: e.message });
+        return res.status(500).json({ error: e.message });
     }
 };
 
@@ -229,27 +204,6 @@ export const updateRatings = async (req, res) => {
         });
 
         res.status(201).json(updatedRatings);
-
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-};
-
-export const changeLocation = async (req, res) => {
-    const { repair_shop_id, longitude, latitude } = req.body;
-
-    try {
-        const repairShop = await AutoRepairShop.findOne({
-            where: { repair_shop_id: repair_shop_id },
-            attributes: ['longitude', 'latitude'],
-        });
-
-        const updatedLocation = await repairShop.update({
-            longitude: longitude,
-            latitude: latitude
-        });
-
-        res.status(201).json(updatedLocation);
 
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -299,7 +253,7 @@ export const refreshAccessToken = async (req, res) => {
         const newAccessToken = jwt.sign(
             { repair_shop_id: repairShop.repair_shop_id },
             process.env.ACCESS_TOKEN,
-            { expiresIn: '1hr' }
+            { expiresIn: '1h' }
         );
 
         res.json({ accessToken: newAccessToken });
