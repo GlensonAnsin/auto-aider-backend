@@ -20,6 +20,8 @@ const AutoRepairShop = sequelize.define('auto_repair_shop', {
     total_score: { type: DataTypes.INTEGER },
     average_rating: { type: DataTypes.DECIMAL },
     approval_status: { type: DataTypes.STRING(20) },
+    profile_bg: { type: DataTypes.STRING(7), allowNull: false },
+    availability: { type: DataTypes.STRING(10), allowNull: false },
 }, {
     tableName: 'auto_repair_shop',
     timestamps: false,

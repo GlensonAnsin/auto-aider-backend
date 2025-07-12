@@ -1,9 +1,10 @@
 import epxress from 'express';
-import { authMiddleware } from '../middlewares/authMiddleware.js';
-import { generateSignature } from '../controllers/cloudinaryController.js';
+import { generateSignature, deleteProfilePic, generateSignatureForShopImages } from '../controllers/cloudinaryController.js';
 
 const router = epxress.Router();
 
 router.post('/generate-signature', generateSignature);
+router.post('/delete-profile', deleteProfilePic);
+router.post('/generate-signature-shop-images', generateSignatureForShopImages);
 
 export default router;
