@@ -51,8 +51,6 @@ export const getUserInfo = async (req, res) => {
     try {
         const userDetail = await User.findOne({where: { user_id: user_id } });
 
-        req.io.emit('updatedProfile', { updatedProfile: userDetail.profile_pic });
-
         res.status(200).json(userDetail);
 
     } catch (e) {
@@ -80,7 +78,7 @@ export const loginUser = async (req, res) => {
         const accessToken = jwt.sign(
             { user_id: user.user_id, role: user.role },
             process.env.ACCESS_TOKEN,
-            { expiresIn: '1h' }
+            { expiresIn: '1d' }
         );
 
         const refreshToken = jwt.sign(
@@ -105,21 +103,51 @@ export const loginUser = async (req, res) => {
 // UPDATE USER INFO
 export const updateUserInfo = async (req, res) => {
     const user_id = req.user.user_id;
-    const { firstname, lastname, gender, email, mobile_num, profile_pic } = req.body;
+    const { 
+        firstname,
+        lastname,
+        gender,
+        email,
+        mobile_num,
+        profile_pic, 
+        field
+    } = req.body;
 
     try {
-        const user = await User.findOne({ where: { user_id: user_id } });
+        const user = await User.findOne({ where: { user_id } });
 
-        const updatedUserInfo = await user.update({
-            firstname,
-            lastname,
-            gender,
-            email,
-            mobile_num,
-            profile_pic
-        });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
 
-        res.status(201).json(updatedUserInfo);
+        let updateData = {};
+
+        switch (field) {
+            case 'firstname':
+                updateData.firstname = firstname;
+                break;
+            case 'lastname':
+                updateData.lastname = lastname;
+                break;
+            case 'gender':
+                updateData.gender = gender;
+                break;
+            case 'email':
+                updateData.email = email;
+                break;
+            case 'mobile-num':
+                updateData.mobile_num = mobile_num;
+                break;
+            case 'profile':
+                updateData.profile_pic = profile_pic;
+                break;
+            default:
+                return res.status(400).json({ error: 'Invalid update field.' });
+        };
+
+        await user.update(updateData);
+        req.io.emit('updatedUserInfo', { updatedUserInfo: user });
+        return res.sendStatus(201);
 
     } catch (e) {
         res.status(500).json({ error: e.message });

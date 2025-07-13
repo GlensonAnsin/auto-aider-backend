@@ -4,7 +4,7 @@ import { generateSignature, deleteProfilePic, generateSignatureForShopImages } f
 const router = epxress.Router();
 
 router.post('/generate-signature', generateSignature);
-router.post('/delete-profile', deleteProfilePic);
+router.post('/delete-image', deleteProfilePic);
 router.post('/generate-signature-shop-images', generateSignatureForShopImages);
 
 export default router;
