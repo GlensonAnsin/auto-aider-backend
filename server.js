@@ -6,6 +6,7 @@ import connectMongo from './src/config/mongoDB.js';
 import userRoutes from './src/routes/userRoutes.js';
 import autoRepairShopRoutes from './src/routes/autoRepairShopRoutes.js';
 import vehicleRoutes from './src/routes/vehicleRoutes.js';
+import vehicleDiagnosticRoutes from './src/routes/vehicleDiagnosticRoutes.js'
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cloudinaryRoutes from './src/routes/cloudinaryRoutes.js';
@@ -48,6 +49,7 @@ app.get('/', (req, res) => {
 app.use('/api/user', userRoutes);
 app.use('/api/auto_repair_shop', autoRepairShopRoutes);
 app.use('/api/vehicle', vehicleRoutes);
+app.use('/api/vehicle_diagnostic', vehicleDiagnosticRoutes);
 
 app.use('/api/cloudinary', cloudinaryRoutes);
 
