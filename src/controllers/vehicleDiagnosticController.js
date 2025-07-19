@@ -1,4 +1,3 @@
-import { error } from "console";
 import { VehicleDiagnostic, Vehicle, User } from "../models/index.js";
 
 // ADD VEHICLE DIAGNOSTIC
