@@ -9,7 +9,7 @@ const VehicleDiagnostic = sequelize.define('vehicle_diagnostic', {
     meaning: { type: DataTypes.TEXT, allowNull: false },
     possible_causes: { type: DataTypes.TEXT, allowNull: false },
     recommended_repair: { type: DataTypes.TEXT, allowNull: false },
-    datetime: { type: DataTypes.DATE, allowNull: false },
+    date: { type: DataTypes.DATE, allowNull: false },
     scan_reference: { type: DataTypes.STRING, allowNull: false },
 }, {
     tableName: 'vehicle_diagnostic',

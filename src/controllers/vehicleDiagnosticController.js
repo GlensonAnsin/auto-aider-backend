@@ -3,7 +3,7 @@ import { VehicleDiagnostic, Vehicle, User } from "../models/index.js";
 // ADD VEHICLE DIAGNOSTIC
 export const addVehicleDiagnostic = async (req, res) => {
     const user_id = req.user.user_id;
-    const { vehicle_id, dtc, technical_description, meaning, possible_causes, recommended_repair, datetime, scan_reference } = req.body;
+    const { vehicle_id, dtc, technical_description, meaning, possible_causes, recommended_repair, date, scan_reference } = req.body;
 
     try {
         const user = await User.findOne({ where: { user_id: user_id } });
@@ -16,7 +16,7 @@ export const addVehicleDiagnostic = async (req, res) => {
                 meaning,
                 possible_causes,
                 recommended_repair,
-                datetime,
+                date,
                 scan_reference
             });
 
@@ -29,7 +29,7 @@ export const addVehicleDiagnostic = async (req, res) => {
 };
 
 // GET ALL VEHICLE DIAGNOSTICS
-export const getVehicleDiagnostic = async (req, res) => {
+export const getVehicleDiagnostics = async (req, res) => {
     const user_id = req.user.user_id;
 
     try {
@@ -37,7 +37,7 @@ export const getVehicleDiagnostic = async (req, res) => {
 
         const vehicleIds = vehicles.map((v) => v.vehicle_id);
 
-        const diagnostic = await VehicleDiagnostic.findAll({
+        const diagnostics = await VehicleDiagnostic.findAll({
             where: {
                 vehicle_id: vehicleIds,
             },
@@ -46,11 +46,20 @@ export const getVehicleDiagnostic = async (req, res) => {
                     model: Vehicle,
                     attributes: ['make', 'model', 'year'],
                 },
-            ],
-            order: [[ 'datetime', 'DESC' ]],
+            ]
         });
 
-        res.status(200).json(diagnostic);
+        const diagnosticsWithVehicle = diagnostics.map((diag) => {
+            const d = diag.toJSON();
+            return {
+                ...d,
+                make: d.vehicle?.make,
+                model: d.vehicle?.model,
+                year: d.vehicle?.year,
+            };
+        });
+
+        res.status(200).json(diagnosticsWithVehicle);
 
     } catch (e) {
         res.status(500).json({ error: e.message });
