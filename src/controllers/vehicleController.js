@@ -1,4 +1,4 @@
-import { Vehicle } from "../models/index.js";
+import { Vehicle, User } from "../models/index.js";
 
 // ADD VEHICLE
 export const addVehicle = async (req, res) => {
@@ -21,7 +21,7 @@ export const addVehicle = async (req, res) => {
     }
 };
 
-// RETRIEVE VEHICLE
+// GET VEHICLE
 export const getVehicles = async (req, res) => {
     const user_id = req.user.user_id;
 
@@ -29,6 +29,24 @@ export const getVehicles = async (req, res) => {
         const userVehicle = await Vehicle.findAll({ where: { user_id: user_id} });
 
         res.status(200).json(userVehicle);
+
+    } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+};
+
+// GET SCANNED VEHICLE
+export const getScannedVehicle = async (req, res) => {
+    const user_id = req.user.user_id;
+    const { vehicle_id } = req.params;
+
+    try {
+        const user = await User.findOne({ where: { user_id: user_id } });
+
+        if (user) {
+            const scannedVehicle = await Vehicle.findOne({ where: { vehicle_id: vehicle_id } });
+            res.status(200).json(scannedVehicle);
+        }
 
     } catch (e) {
         res.status(500).json({ message: e.message });

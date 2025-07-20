@@ -28,8 +28,8 @@ export const addVehicleDiagnostic = async (req, res) => {
     }
 };
 
-// GET ALL VEHICLE DIAGNOSTIC
-export const getAllVehicleDiagnostic = async (req, res) => {
+// GET ALL VEHICLE DIAGNOSTICS
+export const getVehicleDiagnostic = async (req, res) => {
     const user_id = req.user.user_id;
 
     try {
@@ -57,8 +57,8 @@ export const getAllVehicleDiagnostic = async (req, res) => {
     }
 };
 
-// GET VEHICLE DIAGNOSTIC
-export const getVehicleDiagnostic = async (req, res) => {
+// GET ONGOING VEHICLE DIAGNOSTICS
+export const getOnVehicleDiagnostic = async (req, res) => {
     const user_id = req.user.user_id;
     const { vehicle_id, scan_reference } = req.params;
 
@@ -66,15 +66,32 @@ export const getVehicleDiagnostic = async (req, res) => {
         const user = await User.findOne({ where: { user_id: user_id } });
 
         if (user) {
-            const vehicleDiagnostic = await VehicleDiagnostic.findAll({ where: { vehicle_id: vehicle_id, scan_reference: scan_reference } });
-
-            res.status(200).json(vehicleDiagnostic);
+            const onVehicleDiagnostic = await VehicleDiagnostic.findAll({ where: { vehicle_id: vehicle_id, scan_reference: scan_reference } });
+            res.status(200).json(onVehicleDiagnostic);
         }
 
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
 };
+
+// GET DETAILS OF ONGOING SPECIFIC VEHICLE DIAGNOSTIC
+export const getOnSpecificVehicleDiagnostic = async (req, res) => {
+    const user_id = req.user.user_id;
+    const { vehicle_diagnostic_id } = req.params;
+
+    try {
+        const user = await User.findOne({ where: { user_id: user_id } });
+
+        if (user) {
+            const onSpecificVehicleDiag = await VehicleDiagnostic.findOne({ where: { vehicle_diagnostic_id: vehicle_diagnostic_id } });
+            res.status(200).json(onSpecificVehicleDiag);
+        }
+
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+}
 
 // REMOVE VEHICLE DIAGNOSTIC
 export const removeVehicleDiagnostic = async (req, res) => {
