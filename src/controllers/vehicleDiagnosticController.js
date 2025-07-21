@@ -46,7 +46,8 @@ export const getVehicleDiagnostics = async (req, res) => {
                     model: Vehicle,
                     attributes: ['make', 'model', 'year'],
                 },
-            ]
+            ],
+            order: [['vehicle_diagnostic_id', 'ASC']],
         });
 
         const diagnosticsWithVehicle = diagnostics.map((diag) => {
@@ -58,7 +59,7 @@ export const getVehicleDiagnostics = async (req, res) => {
                 year: d.vehicle?.year,
             };
         });
-
+        
         res.status(200).json(diagnosticsWithVehicle);
 
     } catch (e) {
