@@ -10,6 +10,7 @@ import vehicleDiagnosticRoutes from './src/routes/vehicleDiagnosticRoutes.js'
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cloudinaryRoutes from './src/routes/cloudinaryRoutes.js';
+import mechanicRequestRoutes from './src/routes/mechanicRequestRoutes.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -50,6 +51,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/auto_repair_shop', autoRepairShopRoutes);
 app.use('/api/vehicle', vehicleRoutes);
 app.use('/api/vehicle_diagnostic', vehicleDiagnosticRoutes);
+app.use('/api/mechanic_request', mechanicRequestRoutes);
 
 app.use('/api/cloudinary', cloudinaryRoutes);
 

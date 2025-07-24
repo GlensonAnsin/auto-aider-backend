@@ -9,7 +9,6 @@ export const addRequest = async (req, res) => {
         repair_procedure,
         request_datetime,
         status,
-        vehicle_name
     } = req.body;
 
     try {
@@ -25,10 +24,9 @@ export const addRequest = async (req, res) => {
             repair_procedure,
             request_datetime,
             status,
-            vehicle_name,
         });
 
-        res.sendStatus(200);
+        res.sendStatus(201);
 
     } catch (e) {
         res.status(500).json({ error: e.message });

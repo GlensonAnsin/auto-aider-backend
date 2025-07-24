@@ -3,7 +3,7 @@ import { VehicleDiagnostic, Vehicle, User } from "../models/index.js";
 // ADD VEHICLE DIAGNOSTIC
 export const addVehicleDiagnostic = async (req, res) => {
     const user_id = req.user.user_id;
-    const { vehicle_id, dtc, technical_description, meaning, possible_causes, recommended_repair, date, scan_reference } = req.body;
+    const { vehicle_id, dtc, technical_description, meaning, possible_causes, recommended_repair, date, scan_reference, vehicle_issue_description } = req.body;
 
     try {
         const user = await User.findOne({ where: { user_id: user_id } });
@@ -17,7 +17,8 @@ export const addVehicleDiagnostic = async (req, res) => {
                 possible_causes,
                 recommended_repair,
                 date,
-                scan_reference
+                scan_reference,
+                vehicle_issue_description,
             });
 
             res.status(201).json(vehicleDiagnostic);
