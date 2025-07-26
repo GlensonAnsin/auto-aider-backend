@@ -58,7 +58,6 @@ export const getRequestsForCarOwner = async (req, res) => {
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        console.log(repairShopIDs);
         res.status(200).json(user);
 
     } catch (e) {
