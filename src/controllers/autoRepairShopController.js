@@ -7,12 +7,12 @@ dotenv.config();
 
 // SIGNUP REPAIR SHOP
 export const createRepairShop = async (req, res) => {
-    const { owner_firstname, owner_lastname, gender, shop_name, mobile_num, password, email, services_offered, longitude, latitude, creation_date, profile_pic, shop_images, number_of_ratings, average_rating, approval_status, total_score, profile_bg, availability  } = req.body;
+    const { owner_firstname, owner_lastname, gender, shop_name, mobile_num, password, email, services_offered, longitude, latitude, creation_date, profile_pic, shop_images, number_of_ratings, average_rating, approval_status, total_score, profile_bg, availability, is_deleted  } = req.body;
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const repairShop = AutoRepairShop.create({
+        await AutoRepairShop.create({
             owner_firstname,
             owner_lastname,
             gender,
@@ -32,12 +32,13 @@ export const createRepairShop = async (req, res) => {
             total_score,
             profile_bg,
             availability,
+            is_deleted,
         });
 
-        res.status(201).json(repairShop);
+        res.sendStatus(201);
 
     } catch (e) {
-        res.status(400).json({ error: e.message });
+        res.status(500).json({ error: e.message });
     }
 };
 

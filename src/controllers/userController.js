@@ -7,12 +7,12 @@ dotenv.config();
 
 // SIGNUP
 export const createUser = async (req, res) => {
-    const { firstname, lastname, gender, email, mobile_num, password, creation_date, profile_pic, role, user_initials_bg } = req.body;
+    const { firstname, lastname, gender, email, mobile_num, password, creation_date, profile_pic, role, user_initials_bg, is_deleted } = req.body;
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = await User.create({
+        await User.create({
             firstname,
             lastname,
             gender,
@@ -22,10 +22,11 @@ export const createUser = async (req, res) => {
             creation_date,
             profile_pic,
             role,
-            user_initials_bg
+            user_initials_bg,
+            is_deleted,
         });
 
-        res.status(201).json(user);
+        res.sendStatus(201);
         
     } catch (e) {
         res.status(500).json({ error: e.message });

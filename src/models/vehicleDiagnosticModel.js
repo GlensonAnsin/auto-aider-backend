@@ -12,6 +12,7 @@ const VehicleDiagnostic = sequelize.define('vehicle_diagnostic', {
     date: { type: DataTypes.DATE, allowNull: false },
     scan_reference: { type: DataTypes.STRING, allowNull: false },
     vehicle_issue_description: { type: DataTypes.STRING },
+    is_deleted : { type: DataTypes.BOOLEAN, allowNull: false },
 }, {
     tableName: 'vehicle_diagnostic',
     timestamps: false,
