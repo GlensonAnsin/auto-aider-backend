@@ -8,7 +8,7 @@ const Vehicle = sequelize.define('vehicle', {
     model: { type: DataTypes.STRING(50), allowNull: false },
     year: { type: DataTypes.STRING(4), allowNull: false },
     date_added: { type: DataTypes.DATE, allowNull: false },
-    is_deleted : { type: DataTypes.BOOLEAN, allowNull: false },
+    is_deleted: { type: DataTypes.BOOLEAN, allowNull: false },
 }, {
     tableName: 'vehicle',
     timestamps: false,

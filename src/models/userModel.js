@@ -13,7 +13,7 @@ const User = sequelize.define('user', {
     profile_pic: { type: DataTypes.TEXT },
     role: { type: DataTypes.STRING(20), allowNull: false },
     user_initials_bg: { type: DataTypes.STRING(7), allowNull: false },
-    is_deleted : { type: DataTypes.BOOLEAN, allowNull: false },
+    is_deleted: { type: DataTypes.BOOLEAN, allowNull: false },
 }, {
     tableName: 'user',
     timestamps: false,

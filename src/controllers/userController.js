@@ -7,7 +7,19 @@ dotenv.config();
 
 // SIGNUP
 export const createUser = async (req, res) => {
-    const { firstname, lastname, gender, email, mobile_num, password, creation_date, profile_pic, role, user_initials_bg, is_deleted } = req.body;
+    const { 
+        firstname,
+        lastname,
+        gender,
+        email,
+        mobile_num,
+        password,
+        creation_date,
+        profile_pic,
+        role,
+        user_initials_bg,
+        is_deleted
+    } = req.body;
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -37,7 +49,6 @@ export const createUser = async (req, res) => {
 export const getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll();
-
         res.status(200).json(users);
 
     } catch (e) {
@@ -51,7 +62,6 @@ export const getUserInfo = async (req, res) => {
 
     try {
         const userDetail = await User.findOne({where: { user_id: user_id } });
-
         res.status(200).json(userDetail);
 
     } catch (e) {
@@ -61,7 +71,10 @@ export const getUserInfo = async (req, res) => {
 
 // LOGIN
 export const loginUser = async (req, res) => {
-    const { username, password } = req.body;
+    const {
+        username,
+        password
+    } = req.body;
 
     try {
         const user = await User.findOne({ where: { mobile_num: username } });
@@ -116,11 +129,6 @@ export const updateUserInfo = async (req, res) => {
 
     try {
         const user = await User.findOne({ where: { user_id } });
-
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-
         let updateData = {};
 
         switch (field) {
@@ -157,11 +165,13 @@ export const updateUserInfo = async (req, res) => {
 
 export const changePass = async (req, res) => {
     const user_id = req.user.user_id;
-    const { newPassword, currentPassword } = req.body;
+    const {
+        newPassword,
+        currentPassword
+    } = req.body;
 
     try {
         const user = await User.findOne({ where: { user_id: user_id } });
-
         const isMatch = await bcrypt.compare(currentPassword, user.password);
 
         if (!isMatch) {
@@ -170,11 +180,11 @@ export const changePass = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        const updatedPassword = await user.update({
+        await user.update({
             password: hashedPassword
         });
-
-        res.status(201).json(updatedPassword);
+        
+        res.sendStatus(201);
 
     } catch (e) {
         res.status(500).json({ error: e.message });

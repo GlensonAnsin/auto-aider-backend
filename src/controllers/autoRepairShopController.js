@@ -7,7 +7,28 @@ dotenv.config();
 
 // SIGNUP REPAIR SHOP
 export const createRepairShop = async (req, res) => {
-    const { owner_firstname, owner_lastname, gender, shop_name, mobile_num, password, email, services_offered, longitude, latitude, creation_date, profile_pic, shop_images, number_of_ratings, average_rating, approval_status, total_score, profile_bg, availability, is_deleted  } = req.body;
+    const {
+        owner_firstname,
+        owner_lastname,
+        gender,
+        shop_name,
+        mobile_num,
+        password,
+        email,
+        services_offered,
+        longitude,
+        latitude,
+        creation_date,
+        profile_pic,
+        shop_images,
+        number_of_ratings,
+        average_rating,
+        approval_status,
+        total_score,
+        profile_bg,
+        availability,
+        is_deleted 
+    } = req.body;
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -34,7 +55,7 @@ export const createRepairShop = async (req, res) => {
             availability,
             is_deleted,
         });
-
+        
         res.sendStatus(201);
 
     } catch (e) {
@@ -46,7 +67,6 @@ export const createRepairShop = async (req, res) => {
 export const getAllRepairShops = async (req, res) => {
     try {
         const repairShops = await AutoRepairShop.findAll();
-
         res.json(repairShops);
 
     } catch (e) {
@@ -60,7 +80,6 @@ export const getRepairShopInfo = async (req, res) => {
 
     try {
         const repairShopDetail = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
-
         res.status(200).json(repairShopDetail);
 
     } catch (e) {
@@ -70,7 +89,10 @@ export const getRepairShopInfo = async (req, res) => {
 
 // LOGIN REPAIR SHOP
 export const loginRepairShop = async (req, res) => {
-    const { username, password } = req.body;
+    const {
+        username,
+        password
+    } = req.body;
 
     try {
         const repairShop = await AutoRepairShop.findOne({ where: { mobile_num: username } });
@@ -199,18 +221,21 @@ export const updateRepairShopInfo = async (req, res) => {
 
 export const updateRatings = async (req, res) => {
     const repair_shop_id = req.user.repair_shop_id
-    const { rate, score } = req.body;
+    const {
+        rate,
+        score
+    } = req.body;
 
     try {
         const repairShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
 
-        const updatedRatings = await repairShop.update({
+        await repairShop.update({
             number_of_ratings: number_of_ratings + rate,
             average_rating: total_score / number_of_ratings,
             total_score: total_score + score
         });
 
-        res.status(201).json(updatedRatings);
+        res.sendStatus(201);
 
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -218,7 +243,10 @@ export const updateRatings = async (req, res) => {
 };
 
 export const updateApprovalStatus = async (req, res) => {
-    const { repair_shop_id, update } = req.body;
+    const {
+        repair_shop_id,
+        update
+    } = req.body;
 
     try {
         const repairShop = await AutoRepairShop.findOne({
@@ -226,11 +254,11 @@ export const updateApprovalStatus = async (req, res) => {
             attributes: ['approval_status'],
         });
 
-        const updatedApprovalStatus = await repairShop.update({
+        await repairShop.update({
             approval_status: update
         });
 
-        res.status(201).json(updatedApprovalStatus);
+        res.sendStatus(201);
 
     } catch (e) {
         res.status(500).json({ error: e.message });

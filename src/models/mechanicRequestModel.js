@@ -8,7 +8,7 @@ const MechanicRequest = sequelize.define('mechanic_request', {
     repair_procedure: { type: DataTypes.TEXT },
     request_datetime: { type: DataTypes.DATE, allowNull: false },
     status: { type: DataTypes.STRING(20), allowNull: false },
-    is_deleted : { type: DataTypes.BOOLEAN, allowNull: false },
+    is_deleted: { type: DataTypes.BOOLEAN, allowNull: false },
 }, {
     tableName: 'mechanic_request',
     timestamps: false,

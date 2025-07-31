@@ -3,13 +3,24 @@ import { VehicleDiagnostic, Vehicle, User } from "../models/index.js";
 // ADD VEHICLE DIAGNOSTIC
 export const addVehicleDiagnostic = async (req, res) => {
     const user_id = req.user.user_id;
-    const { vehicle_id, dtc, technical_description, meaning, possible_causes, recommended_repair, date, scan_reference, vehicle_issue_description } = req.body;
+    const {
+        vehicle_id,
+        dtc,
+        technical_description,
+        meaning,
+        possible_causes,
+        recommended_repair,
+        date,
+        scan_reference,
+        vehicle_issue_description,
+        is_deleted
+    } = req.body;
 
     try {
         const user = await User.findOne({ where: { user_id: user_id } });
 
         if (user) {
-            const vehicleDiagnostic = await VehicleDiagnostic.create({
+            await VehicleDiagnostic.create({
                 vehicle_id,
                 dtc,
                 technical_description,
@@ -19,13 +30,14 @@ export const addVehicleDiagnostic = async (req, res) => {
                 date,
                 scan_reference,
                 vehicle_issue_description,
+                is_deleted,
             });
 
-            res.status(201).json(vehicleDiagnostic);
+            res.sendStatus(201);
         };
 
     } catch (e) {
-        res.status(400).json({ error: e.message });
+        res.status(500).json({ error: e.message });
     }
 };
 
@@ -35,7 +47,6 @@ export const getVehicleDiagnostics = async (req, res) => {
 
     try {
         const vehicles = await Vehicle.findAll({ where: { user_id: user_id } });
-
         const vehicleIds = vehicles.map((v) => v.vehicle_id);
 
         const diagnostics = await VehicleDiagnostic.findAll({
@@ -60,7 +71,7 @@ export const getVehicleDiagnostics = async (req, res) => {
                 year: d.vehicle?.year,
             };
         });
-        
+
         res.status(200).json(diagnosticsWithVehicle);
 
     } catch (e) {
@@ -71,7 +82,10 @@ export const getVehicleDiagnostics = async (req, res) => {
 // GET ONGOING VEHICLE DIAGNOSTICS
 export const getOnVehicleDiagnostic = async (req, res) => {
     const user_id = req.user.user_id;
-    const { vehicle_id, scan_reference } = req.params;
+    const {
+        vehicle_id,
+        scan_reference
+    } = req.params;
 
     try {
         const user = await User.findOne({ where: { user_id: user_id } });

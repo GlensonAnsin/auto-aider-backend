@@ -9,6 +9,7 @@ export const addRequest = async (req, res) => {
         repair_procedure,
         request_datetime,
         status,
+        is_deleted
     } = req.body;
 
     try {
@@ -24,6 +25,7 @@ export const addRequest = async (req, res) => {
             repair_procedure,
             request_datetime,
             status,
+            is_deleted,
         });
 
         res.sendStatus(201);
