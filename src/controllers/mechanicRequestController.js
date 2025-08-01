@@ -51,9 +51,9 @@ export const getRequestsForCarOwner = async (req, res) => {
                     include: [{
                         model: MechanicRequest,
                         required: true,
-                    }]
-                }]
-            }]
+                    }],
+                }],
+            }],
         });
 
         res.status(200).json(user);

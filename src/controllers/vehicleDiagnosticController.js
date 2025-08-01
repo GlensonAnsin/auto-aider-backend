@@ -62,7 +62,9 @@ export const getVehicleDiagnostics = async (req, res) => {
             order: [['vehicle_diagnostic_id', 'ASC']],
         });
 
-        const diagnosticsWithVehicle = diagnostics.map((diag) => {
+        const filterDeleted = diagnostics.filter((item) => item.is_deleted !== true && item.dtc !== null);
+
+        const diagnosticsWithVehicle = filterDeleted.map((diag) => {
             const d = diag.toJSON();
             return {
                 ...d,
@@ -118,16 +120,74 @@ export const getOnSpecificVehicleDiagnostic = async (req, res) => {
     }
 }
 
-// REMOVE VEHICLE DIAGNOSTIC
-export const removeVehicleDiagnostic = async (req, res) => {
-    const { vehicle_diagnostic_id } = req.params;
+// DELETE VEHICLE DIAGNOSTIC
+export const deleteVehicleDiagnostic = async (req, res) => {
+    const user_id = req.user.user_id;
+    const { scan_reference } = req.body;
 
     try {
-        const diagnostic = await VehicleDiagnostic.findOne({ where: { vehicle_diagnostic_id: vehicle_diagnostic_id } });
+        const user = await User.findOne({ where: { user_id: user_id } });
 
-        const deletedDiagnostic = await diagnostic.destroy();
+        if (user) {
+            const diagnostics = await VehicleDiagnostic.findAll({ where: { scan_reference: scan_reference } });
 
-        res.status(200).json(deletedDiagnostic);
+            await Promise.all(
+                diagnostics.map((item) => item.update({
+                    is_deleted: true,
+                }))
+            );
+
+            const deletedVehicleDiag = diagnostics.map((item) => item.scan_reference);
+            req.io.emit('vehicleDiagnosticDeleted', { deletedVehicleDiag: deletedVehicleDiag });
+            res.sendStatus(200);
+        }
+
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};
+
+// DELETE ALL VEHICLE DIAGNOSTICS
+export const deleteAllVehicleDiagnostics = async (req, res) => {
+    const user_id = req.user.user_id;
+
+    try {
+        const user = await User.findOne({
+            where: { user_id },
+            include: [{
+                model: Vehicle,
+                required: true,
+                include: [{
+                    model: VehicleDiagnostic,
+                    required: true,
+                }],
+            }],
+        });
+
+        let allDeletedVehicleDiag = []
+
+        if (user.vehicles) {
+            await Promise.all(
+                user.vehicles.map(async (vehicle) => {
+                    if (vehicle.vehicle_diagnostics) {
+                        await Promise.all(
+                            vehicle.vehicle_diagnostics.map(async (diagnostic) => {
+                                if (diagnostic) {
+                                    allDeletedVehicleDiag.push(diagnostic.scan_reference);
+                                    const vehicleDiag = await VehicleDiagnostic.findOne({ where: { vehicle_diagnostic_id: diagnostic.vehicle_diagnostic_id } });
+                                    await vehicleDiag.update({
+                                        is_deleted: true,
+                                    });
+                                }
+                            })
+                        );
+                    }
+                })
+            );
+        }
+
+        req.io.emit('allVehicleDiagnosticDeleted', { allDeletedVehicleDiag: allDeletedVehicleDiag });
+        res.sendStatus(200);
 
     } catch (e) {
         res.status(500).json({ error: e.message });
