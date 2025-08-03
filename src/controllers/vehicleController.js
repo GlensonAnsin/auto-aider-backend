@@ -24,6 +24,10 @@ export const addVehicle = async (req, res) => {
                 is_deleted,
             });
 
+            const updatedVehicleList = await Vehicle.findAll({ where: { user_id: user_id } });
+
+            req.io.emit('vehicleAdded', { vehicleAdded: true });
+            req.io.emit('updatedVehicleList', { updatedVehicleList });
             res.sendStatus(201);
         }
 
@@ -79,7 +83,20 @@ export const deleteVehicle = async (req, res) => {
                 is_deleted: true,
             });
 
+            const allVehicles = await Vehicle.findAll({ where: { user_id: user_id } });
+            let verifier = [];
+
+            allVehicles.map((item) => {
+                verifier.push(item.is_deleted);
+            });
+
+            const isVehicles = verifier.includes(false);
             req.io.emit('vehicleDeleted', { vehicleID: userVehicle.vehicle_id });
+
+            if (!isVehicles) {
+                req.io.emit('noVehicles', { noVehicles: false });
+            }
+
             res.sendStatus(200);
         }
 
