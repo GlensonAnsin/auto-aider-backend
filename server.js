@@ -52,7 +52,6 @@ app.use('/api/auto_repair_shop', autoRepairShopRoutes);
 app.use('/api/vehicle', vehicleRoutes);
 app.use('/api/vehicle_diagnostic', vehicleDiagnosticRoutes);
 app.use('/api/mechanic_request', mechanicRequestRoutes);
-
 app.use('/api/cloudinary', cloudinaryRoutes);
 
 // START SERVER
