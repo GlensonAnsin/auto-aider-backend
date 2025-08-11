@@ -9,6 +9,8 @@ const MechanicRequest = sequelize.define('mechanic_request', {
     request_datetime: { type: DataTypes.DATE, allowNull: false },
     status: { type: DataTypes.STRING(20), allowNull: false },
     is_deleted: { type: DataTypes.BOOLEAN, allowNull: false },
+    completed_on: { type: DataTypes.DATE },
+    reason_rejected: { type: DataTypes.STRING },
 }, {
     tableName: 'mechanic_request',
     timestamps: false,

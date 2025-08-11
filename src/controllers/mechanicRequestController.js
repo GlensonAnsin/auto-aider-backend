@@ -9,7 +9,9 @@ export const addRequest = async (req, res) => {
         repair_procedure,
         request_datetime,
         status,
-        is_deleted
+        is_deleted,
+        completed_on,
+        rejected_reason,
     } = req.body;
 
     try {
@@ -26,6 +28,8 @@ export const addRequest = async (req, res) => {
             request_datetime,
             status,
             is_deleted,
+            completed_on,
+            rejected_reason,
         });
 
         res.sendStatus(201);
@@ -62,3 +66,34 @@ export const getRequestsForCarOwner = async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 };
+
+export const getRequestsForRepairShop = async (req, res) => {
+    const repair_shop_id = req.user.repair_shop_id;
+
+    try {
+        const repShop = await AutoRepairShop.findOne({
+            where: { repair_shop_id },
+            include: [{
+                model: MechanicRequest,
+                required: true,
+                include: [{
+                    model: VehicleDiagnostic,
+                    required: true,
+                    include: [{
+                        model: Vehicle,
+                        required: true,
+                        include: [{
+                            model: User,
+                            required: true,
+                        }],
+                    }],
+                }],
+            }],
+        });
+
+        res.status(200).json(repShop);
+        
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+}
