@@ -18,7 +18,9 @@ export const createUser = async (req, res) => {
         profile_pic,
         role,
         user_initials_bg,
-        is_deleted
+        is_deleted,
+        longitude,
+        latitude,
     } = req.body;
 
     try {
@@ -36,6 +38,8 @@ export const createUser = async (req, res) => {
             role,
             user_initials_bg,
             is_deleted,
+            longitude,
+            latitude
         });
 
         res.sendStatus(201);

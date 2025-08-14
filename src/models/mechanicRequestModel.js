@@ -11,6 +11,8 @@ const MechanicRequest = sequelize.define('mechanic_request', {
     is_deleted: { type: DataTypes.BOOLEAN, allowNull: false },
     completed_on: { type: DataTypes.DATE },
     reason_rejected: { type: DataTypes.STRING },
+    longitude: { type: DataTypes.STRING, allowNull: false },
+    latitude: { type: DataTypes.STRING, allowNull: false },
 }, {
     tableName: 'mechanic_request',
     timestamps: false,

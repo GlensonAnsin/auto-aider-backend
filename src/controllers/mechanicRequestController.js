@@ -12,6 +12,8 @@ export const addRequest = async (req, res) => {
         is_deleted,
         completed_on,
         rejected_reason,
+        longitude,
+        latitude,
     } = req.body;
 
     try {
@@ -30,6 +32,8 @@ export const addRequest = async (req, res) => {
             is_deleted,
             completed_on,
             rejected_reason,
+            longitude,
+            latitude,
         });
 
         res.sendStatus(201);
