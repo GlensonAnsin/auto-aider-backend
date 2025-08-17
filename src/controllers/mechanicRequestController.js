@@ -101,3 +101,28 @@ export const getRequestsForRepairShop = async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 }
+
+// REJECT REQUEST
+export const rejectRequest = async (req, res) => {
+    const repair_shop_id = req.user.repair_shop_id;
+    const { requestIDs } = req.body;
+
+    try {
+        const repShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
+
+        if (repShop) {
+            for (item of requestIDs) {
+                const request = await MechanicRequest.findOne({ where: { mechanic_request_id: item } });
+                await request.update({
+                    status: "Rejected",
+                });
+            };
+
+            req.io.emit('requestDeleted', { requestIDs });
+            res.sendStatus(200);
+        };
+
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+}
