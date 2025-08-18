@@ -105,20 +105,73 @@ export const getRequestsForRepairShop = async (req, res) => {
 // REJECT REQUEST
 export const rejectRequest = async (req, res) => {
     const repair_shop_id = req.user.repair_shop_id;
+    const { requestIDs, reason_rejected } = req.body;
+
+    try {
+        const repShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
+
+        if (repShop) {
+            for (const item of requestIDs) {
+                const request = await MechanicRequest.findOne({ where: { mechanic_request_id: item } });
+                await request.update({
+                    status: "Rejected",
+                    reason_rejected: reason_rejected,
+                });
+            };
+
+            req.io.emit('requestRejected', { requestIDs, reason_rejected });
+            res.sendStatus(200);
+        };
+
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};
+
+// ACCEPT REQUEST
+export const acceptRequest = async (req, res) => {
+    const repair_shop_id = req.user.repair_shop_id;
     const { requestIDs } = req.body;
 
     try {
         const repShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
 
         if (repShop) {
-            for (item of requestIDs) {
+            for (const item of requestIDs) {
                 const request = await MechanicRequest.findOne({ where: { mechanic_request_id: item } });
                 await request.update({
-                    status: "Rejected",
+                    status: "Ongoing",
                 });
             };
 
-            req.io.emit('requestDeleted', { requestIDs });
+            req.io.emit('requestAccepted', { requestIDs });
+            res.sendStatus(200);
+        };
+
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};
+
+// REQUEST COMPLETED
+export const requestCompleted = async (req, res) => {
+    const repair_shop_id = req.user.repair_shop_id;
+    const { requestIDs, repair_procedure, completed_on } = req.body;
+
+    try {
+        const repShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
+
+        if (repShop) {
+            for (const item of requestIDs) {
+                const request = await MechanicRequest.findOne({ where: { mechanic_request_id: item } });
+                await request.update({
+                    status: "Completed",
+                    repair_procedure: repair_procedure,
+                    completed_on: completed_on,
+                });
+            };
+
+            req.io.emit('requestCompleted', { requestIDs, repair_procedure, completed_on });
             res.sendStatus(200);
         };
 
