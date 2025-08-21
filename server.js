@@ -2,7 +2,6 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import connectPostgres from './src/config/postgresDB.js';
-import connectMongo from './src/config/mongoDB.js';
 import userRoutes from './src/routes/userRoutes.js';
 import autoRepairShopRoutes from './src/routes/autoRepairShopRoutes.js';
 import vehicleRoutes from './src/routes/vehicleRoutes.js';
