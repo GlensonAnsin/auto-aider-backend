@@ -16,19 +16,19 @@ const httpServer = createServer(app);
 
 // SOCKET
 const io = new Server(httpServer, {
-    cors: {
-        origin: '*',
-        methods: ['GET', 'POST', 'DELETE', 'PATCH']
-    }
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST', 'DELETE', 'PATCH']
+  }
 });
 
 io.on('connection', (socket) => {
-    console.log('A user connected: ', socket.id);
+  console.log('A user connected: ', socket.id);
 });
 
 app.use((req, res, next) => {
-    req.io = io;
-    next();
+  req.io = io;
+  next();
 });
 
 // ENV VAR
@@ -43,7 +43,7 @@ await connectPostgres();
 
 // ROUTES
 app.get('/', (req, res) => {
-    res.send('Server is running.')
+  res.send('Server is running.')
 });
 
 app.use('/api/user', userRoutes);
@@ -56,5 +56,5 @@ app.use('/api/cloudinary', cloudinaryRoutes);
 // START SERVER
 const port = process.env.PORT || 3000;
 httpServer.listen(port, () => {
-    console.log(`Server is running on http://192.168.0.111:${port}`);
+  console.log(`Server is running on http://192.168.0.111:${port}`);
 });
