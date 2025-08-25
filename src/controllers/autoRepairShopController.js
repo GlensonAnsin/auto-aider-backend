@@ -1,4 +1,4 @@
-import { AutoRepairShop } from '../models/index.js';
+import { AutoRepairShop, User } from '../models/index.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
@@ -81,6 +81,24 @@ export const getRepairShopInfo = async (req, res) => {
   try {
     const repairShopDetail = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
     res.status(200).json(repairShopDetail);
+
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+// GET REPAIR SHOP INFO FOR CHAT
+export const getShopInfoForChat = async (req, res) => {
+  const user_id = req.user.user_id;
+  const { repair_shop_id } = req.params
+
+  try {
+    const user = await User.findOne({ where: { user_id: user_id } });
+
+    if (user) {
+      const shopInfo = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
+      res.status(200).json(shopInfo);
+    }
 
   } catch (e) {
     res.status(500).json({ error: e.message });

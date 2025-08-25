@@ -1,4 +1,4 @@
-import { User } from '../models/index.js';
+import { AutoRepairShop, User } from '../models/index.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
@@ -67,6 +67,24 @@ export const getUserInfo = async (req, res) => {
   try {
     const userDetail = await User.findOne({ where: { user_id: user_id } });
     res.status(200).json(userDetail);
+
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+// GET USER INFO FOR CHAT
+export const getUserInfoForChat = async (req, res) => {
+  const repair_shop_id = req.user.repair_shop_id;
+  const { user_id } = req.params;
+
+  try {
+    const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
+
+    if (shop) {
+      const userInfo = await User.findOne({ where: { user_id: user_id } });
+      res.status(200).json(userInfo);
+    }
 
   } catch (e) {
     res.status(500).json({ error: e.message });

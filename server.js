@@ -10,6 +10,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cloudinaryRoutes from './src/routes/cloudinaryRoutes.js';
 import mechanicRequestRoutes from './src/routes/mechanicRequestRoutes.js';
+import chatMessageRoutes from './src/routes/chatMessageRoutes.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -51,6 +52,7 @@ app.use('/api/auto_repair_shop', autoRepairShopRoutes);
 app.use('/api/vehicle', vehicleRoutes);
 app.use('/api/vehicle_diagnostic', vehicleDiagnosticRoutes);
 app.use('/api/mechanic_request', mechanicRequestRoutes);
+app.use('/api/messages', chatMessageRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
 
 // START SERVER
