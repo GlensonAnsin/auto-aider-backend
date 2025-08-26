@@ -35,3 +35,39 @@ export const getConversationForShop = async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 };
+
+// SEND AND RECEIVE MESSAGE
+export const sendMessage = async (req, res) => {
+  const { senderID, receiverID, role, message, sentAt } = req.body;
+
+  try {
+    if (role === 'car-owner') {
+      const conversation = await ChatMessage.create({
+        sender_user_id: senderID,
+        sender_repair_shop_id: null,
+        receiver_user_id: null,
+        receiver_repair_shop_id: receiverID,
+        message: message,
+        sentAt: sentAt,
+      });
+
+      req.io.emit('receiveMessage', { conversation });
+      res.sendStatus(201);
+    } else {
+      const conversation = await ChatMessage.create({
+        sender_user_id: null,
+        sender_repair_shop_id: senderID,
+        receiver_user_id: receiverID,
+        receiver_repair_shop_id: null,
+        message: message,
+        sentAt: sentAt,
+      });
+
+      req.io.emit('receiveMessage', { conversation });
+      res.sendStatus(201);
+    }
+
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};

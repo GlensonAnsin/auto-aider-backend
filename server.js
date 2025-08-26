@@ -11,6 +11,7 @@ import { Server } from 'socket.io';
 import cloudinaryRoutes from './src/routes/cloudinaryRoutes.js';
 import mechanicRequestRoutes from './src/routes/mechanicRequestRoutes.js';
 import chatMessageRoutes from './src/routes/chatMessageRoutes.js';
+import axios from 'axios';
 
 const app = express();
 const httpServer = createServer(app);
@@ -25,6 +26,23 @@ const io = new Server(httpServer, {
 
 io.on('connection', (socket) => {
   console.log('A user connected: ', socket.id);
+
+  socket.on('sendMessage', async ({ senderID, receiverID, role, message, sentAt }) => {
+    try {
+      await axios.post('http://192.168.0.111:3000/api/messages/send-message',
+        {
+          senderID,
+          receiverID,
+          role,
+          message,
+          sentAt,
+        },
+      );
+
+    } catch (e) {
+      console.error('Send message error:', e);
+    }
+  })
 });
 
 app.use((req, res, next) => {
