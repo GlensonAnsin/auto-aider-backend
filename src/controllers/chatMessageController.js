@@ -1,4 +1,5 @@
 import { AutoRepairShop, ChatMessage, User } from "../models/index.js";
+import { Op } from "sequelize";
 
 // GET CONVERSATION FOR CAR OWNER
 export const getConversationForCarOwner = async (req, res) => {
@@ -9,7 +10,14 @@ export const getConversationForCarOwner = async (req, res) => {
     const user = await User.findOne({ where: { user_id: user_id } });
 
     if (user) {
-      const conversation = await ChatMessage.findAll({ where: { sender_user_id: user_id, receiver_repair_shop_id: repair_shop_id } });
+      const conversation = await ChatMessage.findAll({
+        where: {
+          [Op.or]: [
+            { sender_user_id: user_id, receiver_repair_shop_id: repair_shop_id },
+            { sender_repair_shop_id: repair_shop_id, receiver_user_id: user_id },
+          ]
+        }
+      });
       res.status(200).json(conversation);
     }
 
@@ -27,7 +35,14 @@ export const getConversationForShop = async (req, res) => {
     const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
 
     if (shop) {
-      const conversation = await ChatMessage.findAll({ where: { sender_repair_shop_id: repair_shop_id, receiver_user_id: user_id } });
+      const conversation = await ChatMessage.findAll({
+        where: {
+          [Op.or]: [
+            { sender_repair_shop_id: repair_shop_id, receiver_user_id: user_id },
+            { sender_user_id: user_id, receiver_repair_shop_id: repair_shop_id },
+          ]
+        }
+      });
       res.status(200).json(conversation);
     }
 
@@ -48,7 +63,7 @@ export const sendMessage = async (req, res) => {
         receiver_user_id: null,
         receiver_repair_shop_id: receiverID,
         message: message,
-        sentAt: sentAt,
+        sent_at: sentAt,
       });
 
       req.io.emit('receiveMessage', { conversation });
@@ -60,7 +75,7 @@ export const sendMessage = async (req, res) => {
         receiver_user_id: receiverID,
         receiver_repair_shop_id: null,
         message: message,
-        sentAt: sentAt,
+        sent_at: sentAt,
       });
 
       req.io.emit('receiveMessage', { conversation });
