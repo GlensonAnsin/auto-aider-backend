@@ -16,7 +16,8 @@ export const getConversationForCarOwner = async (req, res) => {
             { sender_user_id: user_id, receiver_repair_shop_id: repair_shop_id },
             { sender_repair_shop_id: repair_shop_id, receiver_user_id: user_id },
           ]
-        }
+        },
+        order: [['sent_at', 'ASC']],
       });
       res.status(200).json(conversation);
     }
@@ -41,7 +42,8 @@ export const getConversationForShop = async (req, res) => {
             { sender_repair_shop_id: repair_shop_id, receiver_user_id: user_id },
             { sender_user_id: user_id, receiver_repair_shop_id: repair_shop_id },
           ]
-        }
+        },
+        order: [['sent_at', 'ASC']],
       });
       res.status(200).json(conversation);
     }
@@ -65,9 +67,71 @@ export const getAllConversationsCO = async (req, res) => {
             { sender_user_id: user_id },
             { receiver_user_id: user_id },
           ]
-        }
+        },
+        order: [['sent_at', 'ASC']],
       });
-      res.status(200).json(allChats);
+
+      const chatInfoData = await Promise.all(
+        allChats.map(async (item) => {
+          const shop = await AutoRepairShop.findOne({
+            where: {
+              repair_shop_id: item.sender_repair_shop_id ?? item.receiver_repair_shop_id,
+            },
+          });
+
+          return {
+            chatID: item.chat_id,
+            shopID: shop?.repair_shop_id,
+            senderID: item.sender_user_id,
+            shopName: shop?.shop_name,
+            profilePic: shop?.profile_pic,
+            profileBG: shop?.profile_bg,
+            message: item.message,
+            messageDate: item.sent_at,
+            status: item.status,
+            group: shop?.repair_shop_id,
+          };
+        })
+      );
+
+      const grouped = Object.values(
+        chatInfoData.reduce((acc, item) => {
+          const id = item.group;
+          if (!acc[id]) {
+            acc[id] = {
+              ...item,
+              chatID: [item.chatID],
+              senderID: [item.senderID],
+              message: [item.message],
+              messageDate: [item.messageDate],
+              status: [item.status],
+              group: item.group,
+            };
+          } else {
+            acc[id].chatID.push(item.chatID);
+            acc[id].senderID.push(item.senderID);
+            acc[id].message.push(item.message);
+            acc[id].messageDate.push(item.messageDate);
+            acc[id].status.push(item.status);
+          }
+          return acc;
+        }, {})
+      );
+
+      const groupedChatInfoData = grouped.map((item) => ({
+        userID: user_id,
+        chatID: item.chatID[item.chatID.length - 1],
+        shopID: item.shopID,
+        senderID: item.senderID[item.senderID.length - 1],
+        shopName: item.shopName,
+        profilePic: item.profilePic,
+        profileBG: item.profileBG,
+        message: item.message[item.message.length - 1],
+        messageDate: item.messageDate[item.messageDate.length - 1],
+        status: item.status[item.status.length - 1],
+      }));
+
+      res.status(200).json(groupedChatInfoData);
     }
 
   } catch (e) {
@@ -83,8 +147,79 @@ export const getAllConversationsRS = async (req, res) => {
     const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
 
     if (shop) {
-      const allChats = await ChatMessage.findAll({ where: { sender_repair_shop_id: repair_shop_id } });
-      res.status(200).json(allChats);
+      const allChats = await ChatMessage.findAll({
+        where: {
+          [Op.or]: [
+            { sender_repair_shop_id: repair_shop_id },
+            { receiver_repair_shop_id: repair_shop_id },
+          ]
+        },
+        order: [['sent_at', 'ASC']],
+      });
+
+      const chatInfoData = await Promise.all(
+        allChats.map(async (item) => {
+          const customer = await User.findOne({
+            where: {
+              user_id: item.sender_user_id ?? item.receiver_user_id,
+            },
+          });
+
+          return {
+            chatID: item.chat_id,
+            customerID: customer?.user_id,
+            senderID: item.sender_repair_shop_id,
+            customerFirstname: customer?.firstname,
+            customerLastname: customer?.lastname,
+            profilePic: customer?.profile_pic,
+            profileBG: customer?.user_initials_bg,
+            message: item.message,
+            messageDate: item.sent_at,
+            status: item.status,
+            group: customer?.user_id,
+          };
+        })
+      );
+
+      const grouped = Object.values(
+        chatInfoData.reduce((acc, item) => {
+          const id = item.group;
+          if (!acc[id]) {
+            acc[id] = {
+              ...item,
+              chatID: [item.chatID],
+              senderID: [item.senderID],
+              message: [item.message],
+              messageDate: [item.messageDate],
+              status: [item.status],
+              group: item.group,
+            };
+          } else {
+            acc[id].chatID.push(item.chatID);
+            acc[id].senderID.push(item.senderID);
+            acc[id].message.push(item.message);
+            acc[id].messageDate.push(item.messageDate);
+            acc[id].status.push(item.status);
+          }
+          return acc;
+        }, {})
+      );
+
+      const groupedChatInfoData = grouped.map((item) => ({
+        shopID: repair_shop_id,
+        chatID: item.chatID[item.chatID.length - 1],
+        customerID: item.customerID,
+        senderID: item.senderID[item.senderID.length - 1],
+        customerFirstname: item.customerFirstname,
+        customerLastname: item.customerLastname,
+        profilePic: item.profilePic,
+        profileBG: item.profileBG,
+        message: item.message[item.message.length - 1],
+        messageDate: item.messageDate[item.messageDate.length - 1],
+        status: item.status[item.status.length - 1],
+      }));
+
+      res.status(200).json(groupedChatInfoData);
     }
 
   } catch (e) {
@@ -105,6 +240,7 @@ export const sendMessage = async (req, res) => {
         receiver_repair_shop_id: receiverID,
         message: message,
         sent_at: sentAt,
+        status: 'unread',
       });
 
       req.io.emit('receiveMessage', { conversation });
@@ -117,6 +253,7 @@ export const sendMessage = async (req, res) => {
         receiver_repair_shop_id: null,
         message: message,
         sent_at: sentAt,
+        status: 'unread',
       });
 
       req.io.emit('receiveMessage', { conversation });
@@ -127,3 +264,29 @@ export const sendMessage = async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 };
+
+// UPDATE MESSAGE STATUS
+export const updateMessageStatus = async (req, res) => {
+  const { chatIDs, status } = req.body;
+
+  try {
+    const updatedChat = [];
+
+    for (const id of chatIDs) {
+      const chat = await ChatMessage.findOne({ where: { chat_id: id } })
+      await chat.update({
+        status: status,
+      });
+      updatedChat.push({
+        chatID: id,
+        status: status,
+      });
+    }
+
+    req.io.emit('updatedMessage', { updatedChat });
+    res.sendStatus(201);
+
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}

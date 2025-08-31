@@ -9,6 +9,7 @@ const ChatMessage = sequelize.define('chat_message', {
   receiver_repair_shop_id: { type: DataTypes.BIGINT },
   message: { type: DataTypes.STRING, allowNull: false },
   sent_at: { type: DataTypes.DATE },
+  status: { type: DataTypes.STRING },
 }, {
   tableName: 'chat_message',
   timestamps: false,

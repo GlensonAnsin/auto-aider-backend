@@ -43,6 +43,20 @@ io.on('connection', (socket) => {
       console.error('Send message error:', e);
     }
   })
+
+  socket.on('updateStatus', async ({ chatIDs, status }) => {
+    try {
+      await axios.patch('http://192.168.0.111:3000/api/messages/update-message-status',
+        {
+          chatIDs,
+          status,
+        },
+      );
+      
+    } catch (e) {
+      console.error('Update message status error:', e);
+    }
+  })
 });
 
 app.use((req, res, next) => {
