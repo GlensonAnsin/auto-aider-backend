@@ -29,7 +29,7 @@ io.on('connection', (socket) => {
 
   socket.on('sendMessage', async ({ senderID, receiverID, role, message, sentAt }) => {
     try {
-      await axios.post('http://192.168.0.111:3000/api/messages/send-message',
+      await axios.post('http://192.168.0.100:3000/api/messages/send-message',
         {
           senderID,
           receiverID,
@@ -42,11 +42,15 @@ io.on('connection', (socket) => {
     } catch (e) {
       console.error('Send message error:', e);
     }
-  })
+
+    return () => {
+      socket.off('sendMessage');
+    }
+  });
 
   socket.on('updateStatus', async ({ chatIDs, status }) => {
     try {
-      await axios.patch('http://192.168.0.111:3000/api/messages/update-message-status',
+      await axios.patch('http://192.168.0.100:3000/api/messages/update-message-status',
         {
           chatIDs,
           status,
@@ -56,7 +60,11 @@ io.on('connection', (socket) => {
     } catch (e) {
       console.error('Update message status error:', e);
     }
-  })
+
+    return () => {
+      socket.off('updateStatus');
+    }
+  });
 });
 
 app.use((req, res, next) => {
@@ -90,5 +98,5 @@ app.use('/api/cloudinary', cloudinaryRoutes);
 // START SERVER
 const port = process.env.PORT || 3000;
 httpServer.listen(port, () => {
-  console.log(`Server is running on http://192.168.0.111:${port}`);
+  console.log(`Server is running on http://192.168.0.100:${port}`);
 });

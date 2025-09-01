@@ -243,7 +243,168 @@ export const sendMessage = async (req, res) => {
         status: 'unread',
       });
 
-      req.io.emit('receiveMessage', { conversation });
+      const newChat = {
+        chatID: conversation.chat_id,
+        senderUserID: conversation.sender_user_id,
+        senderShopID: conversation.sender_repair_shop_id,
+        receiverUserID: conversation.receiver_user_id,
+        receiverShopID: conversation.receiver_repair_shop_id,
+        message: conversation.message,
+        sentAt: conversation.sent_at,
+        status: conversation.status,
+        fromYou: conversation.sender_user_id,
+      };
+
+      req.io.emit('receiveMessage', { newChat });
+
+      const allChatsCO = await ChatMessage.findAll({
+        where: {
+          [Op.or]: [
+            { sender_user_id: senderID },
+            { receiver_user_id: senderID },
+          ]
+        },
+        order: [['sent_at', 'ASC']],
+      });
+
+      const chatInfoDataCO = await Promise.all(
+        allChatsCO.map(async (item) => {
+          const shop = await AutoRepairShop.findOne({
+            where: {
+              repair_shop_id: Number(item.sender_repair_shop_id) ?? Number(item.receiver_repair_shop_id),
+            },
+          });
+
+          return {
+            chatID: item.chat_id,
+            shopID: shop?.repair_shop_id,
+            senderID: item.sender_user_id,
+            shopName: shop?.shop_name,
+            profilePic: shop?.profile_pic,
+            profileBG: shop?.profile_bg,
+            message: item.message,
+            messageDate: item.sent_at,
+            status: item.status,
+            group: shop?.repair_shop_id,
+          };
+        })
+      );
+
+      const groupedCO = Object.values(
+        chatInfoDataCO.reduce((acc, item) => {
+          const id = item.group;
+          if (!acc[id]) {
+            acc[id] = {
+              ...item,
+              chatID: [item.chatID],
+              senderID: [item.senderID],
+              message: [item.message],
+              messageDate: [item.messageDate],
+              status: [item.status],
+              group: item.group,
+            };
+          } else {
+            acc[id].chatID.push(item.chatID);
+            acc[id].senderID.push(item.senderID);
+            acc[id].message.push(item.message);
+            acc[id].messageDate.push(item.messageDate);
+            acc[id].status.push(item.status);
+          }
+          return acc;
+        }, {})
+      );
+
+      const groupedChatInfoDataCO = groupedCO.map((item) => ({
+        userID: senderID,
+        chatID: item.chatID[item.chatID.length - 1],
+        shopID: item.shopID,
+        senderID: item.senderID[item.senderID.length - 1],
+        shopName: item.shopName,
+        profilePic: item.profilePic,
+        profileBG: item.profileBG,
+        message: item.message[item.message.length - 1],
+        messageDate: item.messageDate[item.messageDate.length - 1],
+        status: item.status[item.status.length - 1],
+        fromYou: Number(item.senderID[item.senderID.length - 1]) === senderID,
+      }));
+
+      req.io.emit('updateCOInbox', { groupedChatInfoDataCO });
+
+      const allChatsRS = await ChatMessage.findAll({
+        where: {
+          [Op.or]: [
+            { sender_repair_shop_id: receiverID },
+            { receiver_repair_shop_id: receiverID },
+          ]
+        },
+        order: [['sent_at', 'ASC']],
+      });
+
+      const chatInfoDataRS = await Promise.all(
+        allChatsRS.map(async (item) => {
+          const customer = await User.findOne({
+            where: {
+              user_id: Number(item.sender_user_id) ?? Number(item.receiver_user_id),
+            },
+          });
+
+          return {
+            chatID: item.chat_id,
+            customerID: customer?.user_id,
+            senderID: item.sender_repair_shop_id,
+            customerFirstname: customer?.firstname,
+            customerLastname: customer?.lastname,
+            profilePic: customer?.profile_pic,
+            profileBG: customer?.user_initials_bg,
+            message: item.message,
+            messageDate: item.sent_at,
+            status: item.status,
+            group: customer?.user_id,
+          };
+        })
+      );
+
+      const groupedRS = Object.values(
+        chatInfoDataRS.reduce((acc, item) => {
+          const id = item.group;
+          if (!acc[id]) {
+            acc[id] = {
+              ...item,
+              chatID: [item.chatID],
+              senderID: [item.senderID],
+              message: [item.message],
+              messageDate: [item.messageDate],
+              status: [item.status],
+              group: item.group,
+            };
+          } else {
+            acc[id].chatID.push(item.chatID);
+            acc[id].senderID.push(item.senderID);
+            acc[id].message.push(item.message);
+            acc[id].messageDate.push(item.messageDate);
+            acc[id].status.push(item.status);
+          }
+          return acc;
+        }, {})
+      );
+
+      const groupedChatInfoDataRS = groupedRS.map((item) => ({
+        shopID: receiverID,
+        chatID: item.chatID[item.chatID.length - 1],
+        customerID: item.customerID,
+        senderID: item.senderID[item.senderID.length - 1],
+        customerFirstname: item.customerFirstname,
+        customerLastname: item.customerLastname,
+        profilePic: item.profilePic,
+        profileBG: item.profileBG,
+        message: item.message[item.message.length - 1],
+        messageDate: item.messageDate[item.messageDate.length - 1],
+        status: item.status[item.status.length - 1],
+        fromYou: Number(item.senderID[item.senderID.length - 1]) === receiverID,
+      }));
+
+      req.io.emit('updateRSInbox', { groupedChatInfoDataRS });
+
       res.sendStatus(201);
     } else {
       const conversation = await ChatMessage.create({
@@ -256,7 +417,168 @@ export const sendMessage = async (req, res) => {
         status: 'unread',
       });
 
-      req.io.emit('receiveMessage', { conversation });
+      const newChat = {
+        chatID: conversation.chat_id,
+        senderUserID: conversation.sender_user_id,
+        senderShopID: conversation.sender_repair_shop_id,
+        receiverUserID: conversation.receiver_user_id,
+        receiverShopID: conversation.receiver_repair_shop_id,
+        message: conversation.message,
+        sentAt: conversation.sent_at,
+        status: conversation.status,
+        fromYou: conversation.sender_repair_shop_id,
+      };
+
+      req.io.emit('receiveMessage', { newChat });
+
+      const allChatsRS = await ChatMessage.findAll({
+        where: {
+          [Op.or]: [
+            { sender_repair_shop_id: senderID },
+            { receiver_repair_shop_id: senderID },
+          ]
+        },
+        order: [['sent_at', 'ASC']],
+      });
+
+      const chatInfoDataRS = await Promise.all(
+        allChatsRS.map(async (item) => {
+          const customer = await User.findOne({
+            where: {
+              user_id: Number(item.sender_user_id) ?? Number(item.receiver_user_id),
+            },
+          });
+
+          return {
+            chatID: item.chat_id,
+            customerID: customer?.user_id,
+            senderID: item.sender_repair_shop_id,
+            customerFirstname: customer?.firstname,
+            customerLastname: customer?.lastname,
+            profilePic: customer?.profile_pic,
+            profileBG: customer?.user_initials_bg,
+            message: item.message,
+            messageDate: item.sent_at,
+            status: item.status,
+            group: customer?.user_id,
+          };
+        })
+      );
+
+      const groupedRS = Object.values(
+        chatInfoDataRS.reduce((acc, item) => {
+          const id = item.group;
+          if (!acc[id]) {
+            acc[id] = {
+              ...item,
+              chatID: [item.chatID],
+              senderID: [item.senderID],
+              message: [item.message],
+              messageDate: [item.messageDate],
+              status: [item.status],
+              group: item.group,
+            };
+          } else {
+            acc[id].chatID.push(item.chatID);
+            acc[id].senderID.push(item.senderID);
+            acc[id].message.push(item.message);
+            acc[id].messageDate.push(item.messageDate);
+            acc[id].status.push(item.status);
+          }
+          return acc;
+        }, {})
+      );
+
+      const groupedChatInfoDataRS = groupedRS.map((item) => ({
+        shopID: senderID,
+        chatID: item.chatID[item.chatID.length - 1],
+        customerID: item.customerID,
+        senderID: item.senderID[item.senderID.length - 1],
+        customerFirstname: item.customerFirstname,
+        customerLastname: item.customerLastname,
+        profilePic: item.profilePic,
+        profileBG: item.profileBG,
+        message: item.message[item.message.length - 1],
+        messageDate: item.messageDate[item.messageDate.length - 1],
+        status: item.status[item.status.length - 1],
+        fromYou: Number(item.senderID[item.senderID.length - 1]) === senderID,
+      }));
+
+      req.io.emit('updateRSInbox', { groupedChatInfoDataRS });
+
+      const allChatsCO = await ChatMessage.findAll({
+        where: {
+          [Op.or]: [
+            { sender_user_id: receiverID },
+            { receiver_user_id: receiverID },
+          ]
+        },
+        order: [['sent_at', 'ASC']],
+      });
+
+      const chatInfoDataCO = await Promise.all(
+        allChatsCO.map(async (item) => {
+          const shop = await AutoRepairShop.findOne({
+            where: {
+              repair_shop_id: Number(item.sender_repair_shop_id) ?? Number(item.receiver_repair_shop_id),
+            },
+          });
+
+          return {
+            chatID: item.chat_id,
+            shopID: shop?.repair_shop_id,
+            senderID: item.sender_user_id,
+            shopName: shop?.shop_name,
+            profilePic: shop?.profile_pic,
+            profileBG: shop?.profile_bg,
+            message: item.message,
+            messageDate: item.sent_at,
+            status: item.status,
+            group: shop?.repair_shop_id,
+          };
+        })
+      );
+
+      const groupedCO = Object.values(
+        chatInfoDataCO.reduce((acc, item) => {
+          const id = item.group;
+          if (!acc[id]) {
+            acc[id] = {
+              ...item,
+              chatID: [item.chatID],
+              senderID: [item.senderID],
+              message: [item.message],
+              messageDate: [item.messageDate],
+              status: [item.status],
+              group: item.group,
+            };
+          } else {
+            acc[id].chatID.push(item.chatID);
+            acc[id].senderID.push(item.senderID);
+            acc[id].message.push(item.message);
+            acc[id].messageDate.push(item.messageDate);
+            acc[id].status.push(item.status);
+          }
+          return acc;
+        }, {})
+      );
+
+      const groupedChatInfoDataCO = groupedCO.map((item) => ({
+        userID: receiverID,
+        chatID: item.chatID[item.chatID.length - 1],
+        shopID: item.shopID,
+        senderID: item.senderID[item.senderID.length - 1],
+        shopName: item.shopName,
+        profilePic: item.profilePic,
+        profileBG: item.profileBG,
+        message: item.message[item.message.length - 1],
+        messageDate: item.messageDate[item.messageDate.length - 1],
+        status: item.status[item.status.length - 1],
+        fromYou: Number(item.senderID[item.senderID.length - 1]) === receiverID,
+      }));
+
+      req.io.emit('updateCOInbox', { groupedChatInfoDataCO });
+
       res.sendStatus(201);
     }
 
