@@ -122,13 +122,13 @@ export const getAllConversationsCO = async (req, res) => {
         userID: user_id,
         chatID: item.chatID[item.chatID.length - 1],
         shopID: item.shopID,
-        senderID: item.senderID[item.senderID.length - 1],
         shopName: item.shopName,
         profilePic: item.profilePic,
         profileBG: item.profileBG,
         message: item.message[item.message.length - 1],
         messageDate: item.messageDate[item.messageDate.length - 1],
         status: item.status[item.status.length - 1],
+        fromYou: Number(item.senderID[item.senderID.length - 1]) === user_id,
       }));
 
       res.status(200).json(groupedChatInfoData);
@@ -209,7 +209,6 @@ export const getAllConversationsRS = async (req, res) => {
         shopID: repair_shop_id,
         chatID: item.chatID[item.chatID.length - 1],
         customerID: item.customerID,
-        senderID: item.senderID[item.senderID.length - 1],
         customerFirstname: item.customerFirstname,
         customerLastname: item.customerLastname,
         profilePic: item.profilePic,
@@ -217,6 +216,7 @@ export const getAllConversationsRS = async (req, res) => {
         message: item.message[item.message.length - 1],
         messageDate: item.messageDate[item.messageDate.length - 1],
         status: item.status[item.status.length - 1],
+        fromYou: Number(item.senderID[item.senderID.length - 1]) === repair_shop_id,
       }));
 
       res.status(200).json(groupedChatInfoData);
@@ -243,7 +243,7 @@ export const sendMessage = async (req, res) => {
         status: 'unread',
       });
 
-      const newChat = {
+      const newChatCO = {
         chatID: conversation.chat_id,
         senderUserID: conversation.sender_user_id,
         senderShopID: conversation.sender_repair_shop_id,
@@ -252,10 +252,23 @@ export const sendMessage = async (req, res) => {
         message: conversation.message,
         sentAt: conversation.sent_at,
         status: conversation.status,
-        fromYou: conversation.sender_user_id,
+        fromYou: Number(conversation.sender_user_id) === senderID,
       };
 
-      req.io.emit('receiveMessage', { newChat });
+      const newChatRS = {
+        chatID: conversation.chat_id,
+        senderUserID: conversation.sender_user_id,
+        senderShopID: conversation.sender_repair_shop_id,
+        receiverUserID: conversation.receiver_user_id,
+        receiverShopID: conversation.receiver_repair_shop_id,
+        message: conversation.message,
+        sentAt: conversation.sent_at,
+        status: conversation.status,
+        fromYou: Number(conversation.sender_user_id) === receiverID,
+      };
+
+      req.io.emit('receiveMessageCO', { newChatCO });
+      req.io.emit('receiveMessageRS', { newChatRS });
 
       const allChatsCO = await ChatMessage.findAll({
         where: {
@@ -278,7 +291,6 @@ export const sendMessage = async (req, res) => {
           return {
             chatID: item.chat_id,
             shopID: shop?.repair_shop_id,
-            senderID: item.sender_user_id,
             shopName: shop?.shop_name,
             profilePic: shop?.profile_pic,
             profileBG: shop?.profile_bg,
@@ -297,7 +309,6 @@ export const sendMessage = async (req, res) => {
             acc[id] = {
               ...item,
               chatID: [item.chatID],
-              senderID: [item.senderID],
               message: [item.message],
               messageDate: [item.messageDate],
               status: [item.status],
@@ -305,7 +316,6 @@ export const sendMessage = async (req, res) => {
             };
           } else {
             acc[id].chatID.push(item.chatID);
-            acc[id].senderID.push(item.senderID);
             acc[id].message.push(item.message);
             acc[id].messageDate.push(item.messageDate);
             acc[id].status.push(item.status);
@@ -318,14 +328,13 @@ export const sendMessage = async (req, res) => {
         userID: senderID,
         chatID: item.chatID[item.chatID.length - 1],
         shopID: item.shopID,
-        senderID: item.senderID[item.senderID.length - 1],
         shopName: item.shopName,
         profilePic: item.profilePic,
         profileBG: item.profileBG,
         message: item.message[item.message.length - 1],
         messageDate: item.messageDate[item.messageDate.length - 1],
         status: item.status[item.status.length - 1],
-        fromYou: Number(item.senderID[item.senderID.length - 1]) === senderID,
+        fromYou: true,
       }));
 
       req.io.emit('updateCOInbox', { groupedChatInfoDataCO });
@@ -351,7 +360,6 @@ export const sendMessage = async (req, res) => {
           return {
             chatID: item.chat_id,
             customerID: customer?.user_id,
-            senderID: item.sender_repair_shop_id,
             customerFirstname: customer?.firstname,
             customerLastname: customer?.lastname,
             profilePic: customer?.profile_pic,
@@ -371,7 +379,6 @@ export const sendMessage = async (req, res) => {
             acc[id] = {
               ...item,
               chatID: [item.chatID],
-              senderID: [item.senderID],
               message: [item.message],
               messageDate: [item.messageDate],
               status: [item.status],
@@ -379,7 +386,6 @@ export const sendMessage = async (req, res) => {
             };
           } else {
             acc[id].chatID.push(item.chatID);
-            acc[id].senderID.push(item.senderID);
             acc[id].message.push(item.message);
             acc[id].messageDate.push(item.messageDate);
             acc[id].status.push(item.status);
@@ -392,7 +398,6 @@ export const sendMessage = async (req, res) => {
         shopID: receiverID,
         chatID: item.chatID[item.chatID.length - 1],
         customerID: item.customerID,
-        senderID: item.senderID[item.senderID.length - 1],
         customerFirstname: item.customerFirstname,
         customerLastname: item.customerLastname,
         profilePic: item.profilePic,
@@ -400,7 +405,7 @@ export const sendMessage = async (req, res) => {
         message: item.message[item.message.length - 1],
         messageDate: item.messageDate[item.messageDate.length - 1],
         status: item.status[item.status.length - 1],
-        fromYou: Number(item.senderID[item.senderID.length - 1]) === receiverID,
+        fromYou: false,
       }));
 
       req.io.emit('updateRSInbox', { groupedChatInfoDataRS });
@@ -417,7 +422,7 @@ export const sendMessage = async (req, res) => {
         status: 'unread',
       });
 
-      const newChat = {
+      const newChatRS = {
         chatID: conversation.chat_id,
         senderUserID: conversation.sender_user_id,
         senderShopID: conversation.sender_repair_shop_id,
@@ -426,10 +431,23 @@ export const sendMessage = async (req, res) => {
         message: conversation.message,
         sentAt: conversation.sent_at,
         status: conversation.status,
-        fromYou: conversation.sender_repair_shop_id,
+        fromYou: Number(conversation.sender_repair_shop_id) === senderID,
       };
 
-      req.io.emit('receiveMessage', { newChat });
+      const newChatCO = {
+        chatID: conversation.chat_id,
+        senderUserID: conversation.sender_user_id,
+        senderShopID: conversation.sender_repair_shop_id,
+        receiverUserID: conversation.receiver_user_id,
+        receiverShopID: conversation.receiver_repair_shop_id,
+        message: conversation.message,
+        sentAt: conversation.sent_at,
+        status: conversation.status,
+        fromYou: Number(conversation.sender_repair_shop_id) === receiverID,
+      };
+
+      req.io.emit('receiveMessageRS', { newChatRS });
+      req.io.emit('receiveMessageCO', { newChatCO });
 
       const allChatsRS = await ChatMessage.findAll({
         where: {
@@ -452,7 +470,6 @@ export const sendMessage = async (req, res) => {
           return {
             chatID: item.chat_id,
             customerID: customer?.user_id,
-            senderID: item.sender_repair_shop_id,
             customerFirstname: customer?.firstname,
             customerLastname: customer?.lastname,
             profilePic: customer?.profile_pic,
@@ -472,7 +489,6 @@ export const sendMessage = async (req, res) => {
             acc[id] = {
               ...item,
               chatID: [item.chatID],
-              senderID: [item.senderID],
               message: [item.message],
               messageDate: [item.messageDate],
               status: [item.status],
@@ -480,7 +496,6 @@ export const sendMessage = async (req, res) => {
             };
           } else {
             acc[id].chatID.push(item.chatID);
-            acc[id].senderID.push(item.senderID);
             acc[id].message.push(item.message);
             acc[id].messageDate.push(item.messageDate);
             acc[id].status.push(item.status);
@@ -493,7 +508,6 @@ export const sendMessage = async (req, res) => {
         shopID: senderID,
         chatID: item.chatID[item.chatID.length - 1],
         customerID: item.customerID,
-        senderID: item.senderID[item.senderID.length - 1],
         customerFirstname: item.customerFirstname,
         customerLastname: item.customerLastname,
         profilePic: item.profilePic,
@@ -501,7 +515,7 @@ export const sendMessage = async (req, res) => {
         message: item.message[item.message.length - 1],
         messageDate: item.messageDate[item.messageDate.length - 1],
         status: item.status[item.status.length - 1],
-        fromYou: Number(item.senderID[item.senderID.length - 1]) === senderID,
+        fromYou: true,
       }));
 
       req.io.emit('updateRSInbox', { groupedChatInfoDataRS });
@@ -527,7 +541,6 @@ export const sendMessage = async (req, res) => {
           return {
             chatID: item.chat_id,
             shopID: shop?.repair_shop_id,
-            senderID: item.sender_user_id,
             shopName: shop?.shop_name,
             profilePic: shop?.profile_pic,
             profileBG: shop?.profile_bg,
@@ -546,7 +559,6 @@ export const sendMessage = async (req, res) => {
             acc[id] = {
               ...item,
               chatID: [item.chatID],
-              senderID: [item.senderID],
               message: [item.message],
               messageDate: [item.messageDate],
               status: [item.status],
@@ -554,7 +566,6 @@ export const sendMessage = async (req, res) => {
             };
           } else {
             acc[id].chatID.push(item.chatID);
-            acc[id].senderID.push(item.senderID);
             acc[id].message.push(item.message);
             acc[id].messageDate.push(item.messageDate);
             acc[id].status.push(item.status);
@@ -567,14 +578,13 @@ export const sendMessage = async (req, res) => {
         userID: receiverID,
         chatID: item.chatID[item.chatID.length - 1],
         shopID: item.shopID,
-        senderID: item.senderID[item.senderID.length - 1],
         shopName: item.shopName,
         profilePic: item.profilePic,
         profileBG: item.profileBG,
         message: item.message[item.message.length - 1],
         messageDate: item.messageDate[item.messageDate.length - 1],
         status: item.status[item.status.length - 1],
-        fromYou: Number(item.senderID[item.senderID.length - 1]) === receiverID,
+        fromYou: false,
       }));
 
       req.io.emit('updateCOInbox', { groupedChatInfoDataCO });
