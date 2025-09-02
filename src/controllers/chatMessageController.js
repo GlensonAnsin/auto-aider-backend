@@ -128,7 +128,7 @@ export const getAllConversationsCO = async (req, res) => {
         message: item.message[item.message.length - 1],
         messageDate: item.messageDate[item.messageDate.length - 1],
         status: item.status[item.status.length - 1],
-        fromYou: Number(item.senderID[item.senderID.length - 1]) === user_id,
+        fromYou: Number(item.senderID[item.senderID.length - 1]) === Number(user_id),
       }));
 
       res.status(200).json(groupedChatInfoData);
@@ -161,7 +161,7 @@ export const getAllConversationsRS = async (req, res) => {
         allChats.map(async (item) => {
           const customer = await User.findOne({
             where: {
-              user_id: item.sender_user_id ?? item.receiver_user_id,
+              user_id: Number(item.sender_user_id || item.receiver_user_id),
             },
           });
 
@@ -216,7 +216,7 @@ export const getAllConversationsRS = async (req, res) => {
         message: item.message[item.message.length - 1],
         messageDate: item.messageDate[item.messageDate.length - 1],
         status: item.status[item.status.length - 1],
-        fromYou: Number(item.senderID[item.senderID.length - 1]) === repair_shop_id,
+        fromYou: Number(item.senderID[item.senderID.length - 1]) === Number(repair_shop_id),
       }));
 
       res.status(200).json(groupedChatInfoData);
@@ -284,7 +284,7 @@ export const sendMessage = async (req, res) => {
         allChatsCO.map(async (item) => {
           const shop = await AutoRepairShop.findOne({
             where: {
-              repair_shop_id: Number(item.sender_repair_shop_id) ?? Number(item.receiver_repair_shop_id),
+              repair_shop_id: Number(item.sender_repair_shop_id || item.receiver_repair_shop_id),
             },
           });
 
@@ -353,7 +353,7 @@ export const sendMessage = async (req, res) => {
         allChatsRS.map(async (item) => {
           const customer = await User.findOne({
             where: {
-              user_id: Number(item.sender_user_id) ?? Number(item.receiver_user_id),
+              user_id: Number(item.sender_user_id || item.receiver_user_id),
             },
           });
 
@@ -463,7 +463,7 @@ export const sendMessage = async (req, res) => {
         allChatsRS.map(async (item) => {
           const customer = await User.findOne({
             where: {
-              user_id: Number(item.sender_user_id) ?? Number(item.receiver_user_id),
+              user_id: Number(item.sender_user_id || item.receiver_user_id),
             },
           });
 
@@ -534,7 +534,7 @@ export const sendMessage = async (req, res) => {
         allChatsCO.map(async (item) => {
           const shop = await AutoRepairShop.findOne({
             where: {
-              repair_shop_id: Number(item.sender_repair_shop_id) ?? Number(item.receiver_repair_shop_id),
+              repair_shop_id: Number(item.sender_repair_shop_id || item.receiver_repair_shop_id),
             },
           });
 
