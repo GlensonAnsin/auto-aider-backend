@@ -11,6 +11,7 @@ import { Server } from 'socket.io';
 import cloudinaryRoutes from './src/routes/cloudinaryRoutes.js';
 import mechanicRequestRoutes from './src/routes/mechanicRequestRoutes.js';
 import chatMessageRoutes from './src/routes/chatMessageRoutes.js';
+import savePushTokenRoutes from './src/routes/savePushTokenRoutes.js';
 import axios from 'axios';
 
 const app = express();
@@ -93,6 +94,7 @@ app.use('/api/vehicle', vehicleRoutes);
 app.use('/api/vehicle_diagnostic', vehicleDiagnosticRoutes);
 app.use('/api/mechanic_request', mechanicRequestRoutes);
 app.use('/api/messages', chatMessageRoutes);
+app.use('/api/notifications', savePushTokenRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
 
 // START SERVER

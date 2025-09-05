@@ -5,6 +5,7 @@ import AutoRepairShop from './autoRepairShopModel.js';
 import MechanicRequest from './mechanicRequestModel.js';
 import ChatMessage from './chatMessageModel.js';
 import Notification from './notificationModel.js';
+import SavePushToken from './savePushTokenModel.js';
 
 User.hasMany(Vehicle, { foreignKey: 'user_id', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
 Vehicle.belongsTo(User, { foreignKey: 'user_id', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
@@ -14,6 +15,9 @@ ChatMessage.belongsTo(User, { foreignKey: 'sender_user_id', onUpdate: 'CASCADE',
 
 User.hasMany(ChatMessage, { foreignKey: 'receiver_user_id', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
 ChatMessage.belongsTo(User, { foreignKey: 'receiver_user_id', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
+
+User.hasMany(SavePushToken, { foreignKey: 'user_id', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
+SavePushToken.belongsTo(User, { foreignKey: 'user_id', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
 
 User.hasMany(Notification, { foreignKey: 'user_id', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
 Notification.belongsTo(User, { foreignKey: 'user_id', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
@@ -33,7 +37,10 @@ ChatMessage.belongsTo(AutoRepairShop, { foreignKey: 'sender_repair_shop_id', onU
 AutoRepairShop.hasMany(ChatMessage, { foreignKey: 'receiver_repair_shop_id', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
 ChatMessage.belongsTo(AutoRepairShop, { foreignKey: 'receiver_repair_shop_id', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
 
+AutoRepairShop.hasMany(SavePushToken, { foreignKey: 'repair_shop_id', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
+SavePushToken.belongsTo(AutoRepairShop, { foreignKey: 'repair_shop_id', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
+
 AutoRepairShop.hasMany(Notification, { foreignKey: 'repair_shop_id', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
 Notification.belongsTo(AutoRepairShop, { foreignKey: 'repair_shop_id', onUpdate: 'CASCADE', onDelete: 'CASCADE' });
 
-export { User, Vehicle, VehicleDiagnostic, AutoRepairShop, MechanicRequest, ChatMessage, Notification };
+export { User, Vehicle, VehicleDiagnostic, AutoRepairShop, MechanicRequest, ChatMessage, SavePushToken, Notification };
