@@ -1,5 +1,6 @@
-import { AutoRepairShop, ChatMessage, User } from "../models/index.js";
+import { AutoRepairShop, ChatMessage, SavePushToken, User } from "../models/index.js";
 import { Op } from "sequelize";
+import { sendPushToTokens } from "../utils/pushUtil.js";
 
 // GET CONVERSATION FOR CAR OWNER
 export const getConversationForCarOwner = async (req, res) => {
@@ -410,6 +411,18 @@ export const sendMessage = async (req, res) => {
 
       req.io.emit('updateRSInbox', { groupedChatInfoDataRS });
 
+      const tokens = await SavePushToken.findAll({ where: { user_id: receiverID } });
+      const tokenValues = tokens.map(t => t.token);
+
+      await sendPushToTokens(tokenValues, {
+        title: 'New message',
+        body: message,
+        data: {
+          chatID: groupedChatInfoDataRS.chatID,
+          senderID,
+        },
+      });
+
       res.sendStatus(201);
     } else {
       const conversation = await ChatMessage.create({
@@ -588,6 +601,18 @@ export const sendMessage = async (req, res) => {
       }));
 
       req.io.emit('updateCOInbox', { groupedChatInfoDataCO });
+
+      const tokens = await SavePushToken.findAll({ where: { user_id: receiverID } });
+      const tokenValues = tokens.map(t => t.token);
+
+      await sendPushToTokens(tokenValues, {
+        title: 'New message',
+        body: message,
+        data: {
+          chatID: groupedChatInfoDataRS.chatID,
+          senderID,
+        },
+      });
 
       res.sendStatus(201);
     }

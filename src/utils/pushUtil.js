@@ -31,5 +31,6 @@ export const sendPushToTokens = async (tokens = [], { title, body, data = {} }) 
     }
   }
 
+  console.log(tickets);
   return tickets;
 }
