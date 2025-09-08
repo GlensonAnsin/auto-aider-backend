@@ -411,17 +411,22 @@ export const sendMessage = async (req, res) => {
 
       req.io.emit('updateRSInbox', { groupedChatInfoDataRS });
 
-      const tokens = await SavePushToken.findAll({ where: { user_id: receiverID } });
-      const tokenValues = tokens.map(t => t.token);
+      const socketsInRoom = await req.io.in(`Chat: ${groupedChatInfoDataRS[0].chatID}`).fetchSockets();
+      const recipientInRoom = await socketsInRoom.some(s => Number(s.data.shopID) === Number(receiverID));
 
-      await sendPushToTokens(tokenValues, {
-        title: 'New message',
-        body: message,
-        data: {
-          chatID: groupedChatInfoDataRS.chatID,
-          senderID,
-        },
-      });
+      if (!recipientInRoom) {
+        const tokens = await SavePushToken.findAll({ where: { repair_shop_id: receiverID } });
+        const tokenValues = tokens.map(t => t.token);
+
+        await sendPushToTokens(tokenValues, {
+          title: 'New message',
+          body: message,
+          data: {
+            chatID: groupedChatInfoDataRS[0].chatID,
+            senderID,
+          },
+        });
+      }
 
       res.sendStatus(201);
     } else {
@@ -602,17 +607,22 @@ export const sendMessage = async (req, res) => {
 
       req.io.emit('updateCOInbox', { groupedChatInfoDataCO });
 
-      const tokens = await SavePushToken.findAll({ where: { user_id: receiverID } });
-      const tokenValues = tokens.map(t => t.token);
+      const socketsInRoom = await req.io.in(`Chat: ${groupedChatInfoDataCO[0].chatID}`).fetchSockets();
+      const recipientInRoom = await socketsInRoom.some(s => Number(s.data.shopID) === Number(receiverID));
 
-      await sendPushToTokens(tokenValues, {
-        title: 'New message',
-        body: message,
-        data: {
-          chatID: groupedChatInfoDataRS.chatID,
-          senderID,
-        },
-      });
+      if (!recipientInRoom) {
+        const tokens = await SavePushToken.findAll({ where: { user_id: receiverID } });
+        const tokenValues = tokens.map(t => t.token);
+
+        await sendPushToTokens(tokenValues, {
+          title: 'New message',
+          body: message,
+          data: {
+            chatID: groupedChatInfoDataCO[0].chatID,
+            senderID,
+          },
+        });
+      }
 
       res.sendStatus(201);
     }

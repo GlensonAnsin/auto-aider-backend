@@ -29,6 +29,8 @@ io.on('connection', (socket) => {
   console.log('A user connected: ', socket.id);
 
   socket.on('sendMessage', async ({ senderID, receiverID, role, message, sentAt }) => {
+    socket.join(`room-${new Date()}`);
+    socket.data.senderID = senderID;
     try {
       await axios.post('http://192.168.0.100:3000/api/messages/send-message',
         {
