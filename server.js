@@ -13,6 +13,7 @@ import mechanicRequestRoutes from './src/routes/mechanicRequestRoutes.js';
 import chatMessageRoutes from './src/routes/chatMessageRoutes.js';
 import savePushTokenRoutes from './src/routes/savePushTokenRoutes.js';
 import axios from 'axios';
+import { onlineUsers, onlineShops } from './src/utils/onlineUsers.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -26,11 +27,78 @@ const io = new Server(httpServer, {
 });
 
 io.on('connection', (socket) => {
-  console.log('A user connected: ', socket.id);
+  console.log('A user connected:', socket.id);
+
+  socket.on('registerUser', ({ userID, role }) => {
+    if (role === 'car-owner') {
+      socket.data.userID = userID;
+
+      let user = onlineUsers.find(u => u.userID === userID);
+      if (!user) {
+        user = { userID, sockets: [] };
+        onlineUsers.push(user);
+      }
+      user.sockets.push(socket.id);
+      io.emit('userOnline', { ID: socket.data.userID, isOnline: true });
+    } else {
+      socket.data.shopID = userID;
+
+      let shop = onlineShops.find(s => s.shopID === userID);
+      if (!shop) {
+        shop = { shopID: userID, sockets: [] };
+        onlineShops.push(shop);
+      }
+      shop.sockets.push(socket.id);
+      io.emit('shopOnline', { ID: socket.data.shopID, isOnline: true });
+    }
+
+    return () => {
+      socket.off('registerUser');
+    }
+  });
+
+  socket.on('checkOnlineStatus', ({ ID, role }, callback) => {
+    if (role === 'car-owner') {
+      const isOnline = onlineShops.some(s => s.shopID === ID);
+      callback({ online: isOnline });
+    } else {
+      const isOnline = onlineUsers.some(u => u.userID === ID);
+      callback({ online: isOnline });
+    }
+    return () => {
+      socket.off('checkOnlineStatus');
+    }
+  });
+
+  socket.on('disconnect', () => {
+    if (socket.data.userID) {
+      const user = onlineUsers.find(u => u.userID === socket.data.userID);
+      if (user) {
+        user.sockets = user.sockets.filter(id => id !== socket.id);
+        if (user.sockets.length === 0) {
+          const idx = onlineUsers.findIndex(u => u.userID === socket.data.userID);
+          onlineUsers.splice(idx, 1);
+          io.emit('userOffline', { ID: socket.data.userID, isOnline: false });
+        }
+      }
+    }
+
+    if (socket.data.shopID) {
+      const shop = onlineShops.find(s => s.shopID === socket.data.shopID);
+      if (shop) {
+        shop.sockets = shop.sockets.filter(id => id !== socket.id);
+        if (shop.sockets.length === 0) {
+          const idx = onlineShops.findIndex(s => s.shopID === socket.data.shopID);
+          onlineShops.splice(idx, 1);
+          io.emit('shopOffline', { ID: socket.data.shopID, isOnline: false });
+        }
+      }
+    }
+  });
 
   socket.on('sendMessage', async ({ senderID, receiverID, role, message, sentAt }) => {
-    socket.join(`room-${new Date()}`);
-    socket.data.senderID = senderID;
+    socket.data.onlineUsers = onlineUsers;
+    socket.data.onlineShops = onlineShops;
     try {
       await axios.post('http://192.168.0.100:3000/api/messages/send-message',
         {

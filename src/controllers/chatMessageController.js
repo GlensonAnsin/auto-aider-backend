@@ -1,6 +1,7 @@
 import { AutoRepairShop, ChatMessage, SavePushToken, User } from "../models/index.js";
 import { Op } from "sequelize";
-import { sendPushToTokens } from "../utils/pushUtil.js";
+import { sendPushToTokens } from "../utils/pushNotif.js";
+import { onlineUsers, onlineShops } from "../utils/onlineUsers.js";
 
 // GET CONVERSATION FOR CAR OWNER
 export const getConversationForCarOwner = async (req, res) => {
@@ -411,10 +412,9 @@ export const sendMessage = async (req, res) => {
 
       req.io.emit('updateRSInbox', { groupedChatInfoDataRS });
 
-      const socketsInRoom = await req.io.in(`Chat: ${groupedChatInfoDataRS[0].chatID}`).fetchSockets();
-      const recipientInRoom = await socketsInRoom.some(s => Number(s.data.shopID) === Number(receiverID));
+      const isOnline = onlineShops.some(s => s.shopID === receiverID);
 
-      if (!recipientInRoom) {
+      if (!isOnline) {
         const tokens = await SavePushToken.findAll({ where: { repair_shop_id: receiverID } });
         const tokenValues = tokens.map(t => t.token);
 
@@ -607,10 +607,9 @@ export const sendMessage = async (req, res) => {
 
       req.io.emit('updateCOInbox', { groupedChatInfoDataCO });
 
-      const socketsInRoom = await req.io.in(`Chat: ${groupedChatInfoDataCO[0].chatID}`).fetchSockets();
-      const recipientInRoom = await socketsInRoom.some(s => Number(s.data.shopID) === Number(receiverID));
+      const isOnline = onlineUsers.some(u => u.userID === receiverID);
 
-      if (!recipientInRoom) {
+      if (!isOnline) {
         const tokens = await SavePushToken.findAll({ where: { user_id: receiverID } });
         const tokenValues = tokens.map(t => t.token);
 
