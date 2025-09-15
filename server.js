@@ -14,6 +14,7 @@ import chatMessageRoutes from './src/routes/chatMessageRoutes.js';
 import savePushTokenRoutes from './src/routes/savePushTokenRoutes.js';
 import axios from 'axios';
 import { onlineUsers, onlineShops } from './src/utils/onlineUsers.js';
+import { runPMSScheduler } from './src/utils/pms.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -166,6 +167,9 @@ app.use('/api/mechanic_request', mechanicRequestRoutes);
 app.use('/api/messages', chatMessageRoutes);
 app.use('/api/notifications', savePushTokenRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
+
+// PMS SCHEDULER
+runPMSScheduler()
 
 // START SERVER
 const port = process.env.PORT || 3000;

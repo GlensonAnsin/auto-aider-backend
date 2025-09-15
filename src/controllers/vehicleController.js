@@ -8,7 +8,8 @@ export const addVehicle = async (req, res) => {
     model,
     year,
     date_added,
-    is_deleted
+    is_deleted,
+    last_pms_trigger,
   } = req.body;
 
   try {
@@ -22,6 +23,7 @@ export const addVehicle = async (req, res) => {
         year,
         date_added,
         is_deleted,
+        last_pms_trigger,
       });
 
       const updatedVehicleList = await Vehicle.findAll({ where: { user_id: user_id } });

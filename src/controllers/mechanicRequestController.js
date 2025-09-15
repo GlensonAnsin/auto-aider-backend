@@ -125,7 +125,7 @@ export const rejectRequest = async (req, res) => {
       const tokenValues = tokens.map(t => t.token);
 
       await sendPushToTokens(tokenValues, {
-        title: 'Request rejected',
+        title: 'Request Rejected',
         body: `Repair request for ${year} ${make} ${model} has been rejected.`,
         data: { scanReference },
       });
@@ -160,7 +160,7 @@ export const acceptRequest = async (req, res) => {
       const tokenValues = tokens.map(t => t.token);
 
       await sendPushToTokens(tokenValues, {
-        title: 'Request accepted',
+        title: 'Request Accepted',
         body: `Repair request for ${year} ${make} ${model} has been accepted.`,
         data: { scanReference },
       });
@@ -197,7 +197,7 @@ export const requestCompleted = async (req, res) => {
       const tokenValues = tokens.map(t => t.token);
 
       await sendPushToTokens(tokenValues, {
-        title: 'Request completed',
+        title: 'Request Completed',
         body: `Repair request for ${year} ${make} ${model} has been completed.`,
         data: { scanReference },
       });

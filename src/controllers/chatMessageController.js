@@ -419,7 +419,7 @@ export const sendMessage = async (req, res) => {
         const tokenValues = tokens.map(t => t.token);
 
         await sendPushToTokens(tokenValues, {
-          title: 'New message',
+          title: 'New Message',
           body: message,
           data: {
             chatID: groupedChatInfoDataRS[0].chatID,
@@ -614,7 +614,7 @@ export const sendMessage = async (req, res) => {
         const tokenValues = tokens.map(t => t.token);
 
         await sendPushToTokens(tokenValues, {
-          title: 'New message',
+          title: 'New Message',
           body: message,
           data: {
             chatID: groupedChatInfoDataCO[0].chatID,

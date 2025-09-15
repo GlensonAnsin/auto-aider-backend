@@ -9,6 +9,7 @@ const Vehicle = sequelize.define('vehicle', {
   year: { type: DataTypes.STRING(4), allowNull: false },
   date_added: { type: DataTypes.DATE, allowNull: false },
   is_deleted: { type: DataTypes.BOOLEAN, allowNull: false },
+  last_pms_trigger: { type: DataTypes.DATE, allowNull: false },
 }, {
   tableName: 'vehicle',
   timestamps: false,
