@@ -15,7 +15,7 @@ export const sendPushToTokens = async (tokens = [], { title, body, data = {} }) 
       title,
       body,
       data,
-      channelID: 'default',
+      channelId: 'default',
     });
   }
 

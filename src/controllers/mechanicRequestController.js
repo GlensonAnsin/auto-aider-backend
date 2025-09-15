@@ -105,7 +105,7 @@ export const getRequestsForRepairShop = async (req, res) => {
 // REJECT REQUEST
 export const rejectRequest = async (req, res) => {
   const repair_shop_id = req.user.repair_shop_id;
-  const { requestIDs, reason_rejected } = req.body;
+  const { requestIDs, reason_rejected, scanReference, year, make, model, userID } = req.body;
 
   try {
     const repShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
@@ -120,6 +120,16 @@ export const rejectRequest = async (req, res) => {
       };
 
       req.io.emit('requestRejected', { requestIDs, reason_rejected });
+
+      const tokens = await SavePushToken.findAll({ where: { repair_shop_id: userID } });
+      const tokenValues = tokens.map(t => t.token);
+
+      await sendPushToTokens(tokenValues, {
+        title: 'Request rejected',
+        body: `Repair request for ${year} ${make} ${model} has been rejected.`,
+        data: { scanReference },
+      });
+
       res.sendStatus(200);
     };
 
@@ -131,7 +141,7 @@ export const rejectRequest = async (req, res) => {
 // ACCEPT REQUEST
 export const acceptRequest = async (req, res) => {
   const repair_shop_id = req.user.repair_shop_id;
-  const { requestIDs } = req.body;
+  const { requestIDs, scanReference, year, make, model, userID } = req.body;
 
   try {
     const repShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
@@ -145,6 +155,16 @@ export const acceptRequest = async (req, res) => {
       };
 
       req.io.emit('requestAccepted', { requestIDs });
+
+      const tokens = await SavePushToken.findAll({ where: { repair_shop_id: userID } });
+      const tokenValues = tokens.map(t => t.token);
+
+      await sendPushToTokens(tokenValues, {
+        title: 'Request accepted',
+        body: `Repair request for ${year} ${make} ${model} has been accepted.`,
+        data: { scanReference },
+      });
+
       res.sendStatus(200);
     };
 
@@ -156,7 +176,7 @@ export const acceptRequest = async (req, res) => {
 // REQUEST COMPLETED
 export const requestCompleted = async (req, res) => {
   const repair_shop_id = req.user.repair_shop_id;
-  const { requestIDs, repair_procedure, completed_on } = req.body;
+  const { requestIDs, repair_procedure, completed_on, scanReference, year, make, model, userID } = req.body;
 
   try {
     const repShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
@@ -172,6 +192,16 @@ export const requestCompleted = async (req, res) => {
       };
 
       req.io.emit('requestCompleted', { requestIDs, repair_procedure, completed_on });
+
+      const tokens = await SavePushToken.findAll({ where: { repair_shop_id: userID } });
+      const tokenValues = tokens.map(t => t.token);
+
+      await sendPushToTokens(tokenValues, {
+        title: 'Request completed',
+        body: `Repair request for ${year} ${make} ${model} has been completed.`,
+        data: { scanReference },
+      });
+
       res.sendStatus(200);
     };
 
