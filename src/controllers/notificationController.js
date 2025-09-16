@@ -1,5 +1,5 @@
 import { where } from "sequelize";
-import { Notification, User, AutoRepairShop } from "../models/index";
+import { Notification, User, AutoRepairShop } from "../models/index.js";
 
 // GET ALL NOTIFICATIONS FOR CAR OWNER
 export const getNotificationsCO = async (req, res) => {
