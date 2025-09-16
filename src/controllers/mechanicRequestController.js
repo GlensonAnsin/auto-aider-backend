@@ -1,4 +1,5 @@
-import { AutoRepairShop, MechanicRequest, User, Vehicle, VehicleDiagnostic } from '../models/index.js';
+import { AutoRepairShop, MechanicRequest, User, Vehicle, VehicleDiagnostic, Notification } from '../models/index.js';
+import dayjs from 'dayjs';
 
 // ADD REQUEST
 export const addRequest = async (req, res) => {
@@ -34,6 +35,24 @@ export const addRequest = async (req, res) => {
       rejected_reason,
       longitude,
       latitude,
+    });
+
+    const tokens = await SavePushToken.findAll({ where: { repair_shop_id: repair_shop_id } });
+    const tokenValues = tokens.map(t => t.token);
+
+    await sendPushToTokens(tokenValues, {
+      title: 'New Repair Request',
+      body: `You got a new repair request from ${user.firstname} ${user.lastname}.`,
+      data: {},
+    });
+
+    await Notification.create({
+      user_id: null,
+      repair_shop_id: repair_shop_id,
+      title: 'New Repair Request',
+      message: `You got a new repair request from ${user.firstname} ${user.lastname}.`,
+      is_read: false,
+      created_at: dayjs().format(),
     });
 
     res.sendStatus(201);
@@ -121,13 +140,22 @@ export const rejectRequest = async (req, res) => {
 
       req.io.emit('requestRejected', { requestIDs, reason_rejected });
 
-      const tokens = await SavePushToken.findAll({ where: { repair_shop_id: userID } });
+      const tokens = await SavePushToken.findAll({ where: { user_id: userID } });
       const tokenValues = tokens.map(t => t.token);
 
       await sendPushToTokens(tokenValues, {
         title: 'Request Rejected',
         body: `Repair request for ${year} ${make} ${model} has been rejected.`,
         data: { scanReference },
+      });
+
+      await Notification.create({
+        user_id: userID,
+        repair_shop_id: null,
+        title: 'Request Rejected',
+        message: `Repair request for ${year} ${make} ${model} has been rejected.`,
+        is_read: false,
+        created_at: dayjs().format(),
       });
 
       res.sendStatus(200);
@@ -156,13 +184,22 @@ export const acceptRequest = async (req, res) => {
 
       req.io.emit('requestAccepted', { requestIDs });
 
-      const tokens = await SavePushToken.findAll({ where: { repair_shop_id: userID } });
+      const tokens = await SavePushToken.findAll({ where: { user_id: userID } });
       const tokenValues = tokens.map(t => t.token);
 
       await sendPushToTokens(tokenValues, {
         title: 'Request Accepted',
         body: `Repair request for ${year} ${make} ${model} has been accepted.`,
         data: { scanReference },
+      });
+
+      await Notification.create({
+        user_id: userID,
+        repair_shop_id: null,
+        title: 'Request Accepted',
+        message: `Repair request for ${year} ${make} ${model} has been accepted.`,
+        is_read: false,
+        created_at: dayjs().format(),
       });
 
       res.sendStatus(200);
@@ -193,13 +230,22 @@ export const requestCompleted = async (req, res) => {
 
       req.io.emit('requestCompleted', { requestIDs, repair_procedure, completed_on });
 
-      const tokens = await SavePushToken.findAll({ where: { repair_shop_id: userID } });
+      const tokens = await SavePushToken.findAll({ where: { user_id: userID } });
       const tokenValues = tokens.map(t => t.token);
 
       await sendPushToTokens(tokenValues, {
         title: 'Request Completed',
         body: `Repair request for ${year} ${make} ${model} has been completed.`,
         data: { scanReference },
+      });
+
+      await Notification.create({
+        user_id: userID,
+        repair_shop_id: null,
+        title: 'Request Completed',
+        message: `Repair request for ${year} ${make} ${model} has been completed.`,
+        is_read: false,
+        created_at: dayjs().format(),
       });
 
       res.sendStatus(200);

@@ -12,6 +12,7 @@ import cloudinaryRoutes from './src/routes/cloudinaryRoutes.js';
 import mechanicRequestRoutes from './src/routes/mechanicRequestRoutes.js';
 import chatMessageRoutes from './src/routes/chatMessageRoutes.js';
 import savePushTokenRoutes from './src/routes/savePushTokenRoutes.js';
+import notificationRoutes from './src/routes/notificationRoutes.js';
 import axios from 'axios';
 import { onlineUsers, onlineShops } from './src/utils/onlineUsers.js';
 import { runPMSScheduler } from './src/utils/pms.js';
@@ -166,6 +167,7 @@ app.use('/api/vehicle_diagnostic', vehicleDiagnosticRoutes);
 app.use('/api/mechanic_request', mechanicRequestRoutes);
 app.use('/api/messages', chatMessageRoutes);
 app.use('/api/notifications', savePushTokenRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
 
 // PMS SCHEDULER

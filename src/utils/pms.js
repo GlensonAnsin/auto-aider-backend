@@ -3,6 +3,7 @@ import cron from 'node-cron';
 import dayjs from 'dayjs';
 import { sendPushToTokens } from './pushNotif.js';
 import utc from 'dayjs/plugin/utc.js';
+import { Notification } from '../models/index.js';
 
 dayjs.extend(utc);
 
@@ -37,6 +38,15 @@ export const runPMSScheduler = () => {
               body: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Time for your scheduled PMS today!`,
               data: { vehicleID: vehicle.vehicle_id },
             });
+
+            await Notification.create({
+              user_id: user.user_id,
+              repair_shop_id: null,
+              title: 'PMS Reminder',
+              message: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Time for your scheduled PMS today!`,
+              is_read: false,
+              created_at: dayjs().format(),
+            });
           })();
         }
 
@@ -49,6 +59,15 @@ export const runPMSScheduler = () => {
               title: 'PMS Overdue',
               body: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your PMS is overdue!`,
               data: { vehicleID: vehicle.vehicle_id },
+            });
+
+            await Notification.create({
+              user_id: user.user_id,
+              repair_shop_id: null,
+              title: 'PMS Overdue',
+              message: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your PMS is overdue!`,
+              is_read: false,
+              created_at: dayjs().format(),
             });
           })();
         }
