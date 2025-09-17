@@ -1,4 +1,3 @@
-import { where } from "sequelize";
 import { Notification, User, AutoRepairShop } from "../models/index.js";
 
 // GET ALL NOTIFICATIONS FOR CAR OWNER
@@ -9,7 +8,7 @@ export const getNotificationsCO = async (req, res) => {
 
     if (user) {
       const notifications = await Notification.findAll({ where: { user_id: user_id } });
-      req.status(200).json(notifications);
+      res.status(200).json(notifications);
     }
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -24,7 +23,7 @@ export const getNotificationsRS = async (req, res) => {
 
     if (shop) {
       const notifications = await Notification.findAll({ where: { repair_shop_id: repair_shop_id } });
-      req.status(200).json(notifications);
+      res.status(200).json(notifications);
     }
   } catch (e) {
     res.status(500).json({ error: e.message });

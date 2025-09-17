@@ -1,4 +1,5 @@
-import { AutoRepairShop, MechanicRequest, User, Vehicle, VehicleDiagnostic, Notification } from '../models/index.js';
+import { AutoRepairShop, MechanicRequest, User, Vehicle, VehicleDiagnostic, Notification, SavePushToken } from '../models/index.js';
+import { sendPushToTokens } from "../utils/pushNotif.js";
 import dayjs from 'dayjs';
 
 // ADD REQUEST
@@ -24,7 +25,7 @@ export const addRequest = async (req, res) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    await MechanicRequest.create({
+    const request = await MechanicRequest.create({
       vehicle_diagnostic_id,
       repair_shop_id,
       repair_procedure,
@@ -54,6 +55,8 @@ export const addRequest = async (req, res) => {
       is_read: false,
       created_at: dayjs().format(),
     });
+
+    req.io.emit('addedRequest', { addedRequest: request });
 
     res.sendStatus(201);
 
