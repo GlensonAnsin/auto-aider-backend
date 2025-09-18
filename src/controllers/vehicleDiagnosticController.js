@@ -138,7 +138,7 @@ export const deleteVehicleDiagnostic = async (req, res) => {
       );
 
       const deletedVehicleDiag = diagnostics.map((item) => item.scan_reference);
-      req.io.emit('vehicleDiagnosticDeleted', { deletedVehicleDiag: deletedVehicleDiag });
+      req.io.emit(`vehicleDiagnosticDeleted-CO-${user_id}`, { deletedVehicleDiag: deletedVehicleDiag });
       res.sendStatus(200);
     }
 
@@ -186,7 +186,7 @@ export const deleteAllVehicleDiagnostics = async (req, res) => {
       );
     }
 
-    req.io.emit('allVehicleDiagnosticDeleted', { allDeletedVehicleDiag: allDeletedVehicleDiag });
+    req.io.emit(`allVehicleDiagnosticDeleted-CO-${user_id}`, { allDeletedVehicleDiag: allDeletedVehicleDiag });
     res.sendStatus(200);
 
   } catch (e) {

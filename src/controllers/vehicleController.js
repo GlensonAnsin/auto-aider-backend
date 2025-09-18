@@ -28,8 +28,8 @@ export const addVehicle = async (req, res) => {
 
       const updatedVehicleList = await Vehicle.findAll({ where: { user_id: user_id } });
 
-      req.io.emit('vehicleAdded', { vehicleAdded: true });
-      req.io.emit('updatedVehicleList', { updatedVehicleList });
+      req.io.emit(`vehicleAdded-CO-${user_id}`, { vehicleAdded: true });
+      req.io.emit(`updatedVehicleList-CO-${user_id}`, { updatedVehicleList });
       res.sendStatus(201);
     }
 
@@ -93,10 +93,10 @@ export const deleteVehicle = async (req, res) => {
       });
 
       const isVehicles = verifier.includes(false);
-      req.io.emit('vehicleDeleted', { vehicleID: userVehicle.vehicle_id });
+      req.io.emit(`vehicleDeleted-CO-${user_id}`, { vehicleID: userVehicle.vehicle_id });
 
       if (!isVehicles) {
-        req.io.emit('noVehicles', { noVehicles: false });
+        req.io.emit(`noVehicles-CO-${user_id}`, { noVehicles: false });
       }
 
       res.sendStatus(200);

@@ -177,7 +177,7 @@ export const updateUserInfo = async (req, res) => {
     };
 
     await user.update(updateData);
-    req.io.emit('updatedUserInfo', { updatedUserInfo: user });
+    req.io.emit(`updatedUserInfo-CO-${user_id}`, { updatedUserInfo: user });
     return res.sendStatus(201);
 
   } catch (e) {

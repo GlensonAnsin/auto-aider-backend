@@ -99,8 +99,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('sendMessage', async ({ senderID, receiverID, role, message, sentAt }) => {
-    socket.data.onlineUsers = onlineUsers;
-    socket.data.onlineShops = onlineShops;
     try {
       await axios.post('http://192.168.0.100:3000/api/messages/send-message',
         {

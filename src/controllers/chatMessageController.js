@@ -339,7 +339,7 @@ export const sendMessage = async (req, res) => {
         fromYou: true,
       }));
 
-      req.io.emit('updateCOInbox', { groupedChatInfoDataCO });
+      req.io.emit(`updateInbox-CO-${senderID}`, { groupedChatInfoDataCO });
 
       const allChatsRS = await ChatMessage.findAll({
         where: {
@@ -410,7 +410,7 @@ export const sendMessage = async (req, res) => {
         fromYou: false,
       }));
 
-      req.io.emit('updateRSInbox', { groupedChatInfoDataRS });
+      req.io.emit(`updateInbox-RS-${receiverID}`, { groupedChatInfoDataRS });
 
       const isOnline = onlineShops.some(s => s.shopID === receiverID);
 
@@ -536,7 +536,7 @@ export const sendMessage = async (req, res) => {
         fromYou: true,
       }));
 
-      req.io.emit('updateRSInbox', { groupedChatInfoDataRS });
+      req.io.emit(`updateInbox-RS-${senderID}`, { groupedChatInfoDataRS });
 
       const allChatsCO = await ChatMessage.findAll({
         where: {
@@ -605,7 +605,7 @@ export const sendMessage = async (req, res) => {
         fromYou: false,
       }));
 
-      req.io.emit('updateCOInbox', { groupedChatInfoDataCO });
+      req.io.emit(`updateInbox-CO-${receiverID}`, { groupedChatInfoDataCO });
 
       const isOnline = onlineUsers.some(u => u.userID === receiverID);
 

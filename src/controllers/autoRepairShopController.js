@@ -229,7 +229,7 @@ export const updateRepairShopInfo = async (req, res) => {
     }
 
     await repairShop.update(updateData);
-    req.io.emit('updatedRepairShopInfo', { updatedRepairShopInfo: repairShop });
+    req.io.emit(`updatedRepairShopInfo-RS-${repair_shop_id}`, { updatedRepairShopInfo: repairShop });
     return res.sendStatus(201);
 
   } catch (e) {

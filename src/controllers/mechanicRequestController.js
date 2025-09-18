@@ -25,7 +25,7 @@ export const addRequest = async (req, res) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const request = await MechanicRequest.create({
+    await MechanicRequest.create({
       vehicle_diagnostic_id,
       repair_shop_id,
       repair_procedure,
@@ -55,8 +55,6 @@ export const addRequest = async (req, res) => {
       is_read: false,
       created_at: dayjs().format(),
     });
-
-    req.io.emit('addedRequest', { addedRequest: request });
 
     res.sendStatus(201);
 
@@ -141,7 +139,8 @@ export const rejectRequest = async (req, res) => {
         });
       };
 
-      req.io.emit('requestRejected', { requestIDs, reason_rejected });
+      req.io.emit(`requestRejected-CO-${userID}`, { requestIDs, reason_rejected });
+      req.io.emit(`requestRejected-RS-${repair_shop_id}`, { requestIDs, reason_rejected });
 
       const tokens = await SavePushToken.findAll({ where: { user_id: userID } });
       const tokenValues = tokens.map(t => t.token);
@@ -152,7 +151,7 @@ export const rejectRequest = async (req, res) => {
         data: { scanReference },
       });
 
-      await Notification.create({
+      const newNotif = await Notification.create({
         user_id: userID,
         repair_shop_id: null,
         title: 'Request Rejected',
@@ -160,6 +159,8 @@ export const rejectRequest = async (req, res) => {
         is_read: false,
         created_at: dayjs().format(),
       });
+
+      req.io.emit(`newNotif-CO-${userID}`, { newNotif });
 
       res.sendStatus(200);
     };
@@ -185,7 +186,8 @@ export const acceptRequest = async (req, res) => {
         });
       };
 
-      req.io.emit('requestAccepted', { requestIDs });
+      req.io.emit(`requestAccepted-CO-${userID}`, { requestIDs });
+      req.io.emit(`requestAccepted-RS-${repair_shop_id}`, { requestIDs });
 
       const tokens = await SavePushToken.findAll({ where: { user_id: userID } });
       const tokenValues = tokens.map(t => t.token);
@@ -196,7 +198,7 @@ export const acceptRequest = async (req, res) => {
         data: { scanReference },
       });
 
-      await Notification.create({
+      const newNotif = await Notification.create({
         user_id: userID,
         repair_shop_id: null,
         title: 'Request Accepted',
@@ -204,6 +206,8 @@ export const acceptRequest = async (req, res) => {
         is_read: false,
         created_at: dayjs().format(),
       });
+
+      req.io.emit(`newNotif-CO-${userID}`, { newNotif });
 
       res.sendStatus(200);
     };
@@ -231,25 +235,47 @@ export const requestCompleted = async (req, res) => {
         });
       };
 
-      req.io.emit('requestCompleted', { requestIDs, repair_procedure, completed_on });
+      req.io.emit(`requestCompleted-CO-${userID}`, { requestIDs, repair_procedure, completed_on });
+      req.io.emit(`requestCompleted-RS-${repair_shop_id}`, { requestIDs, repair_procedure, completed_on });
 
       const tokens = await SavePushToken.findAll({ where: { user_id: userID } });
       const tokenValues = tokens.map(t => t.token);
 
-      await sendPushToTokens(tokenValues, {
-        title: 'Request Completed',
-        body: `Repair request for ${year} ${make} ${model} has been completed.`,
-        data: { scanReference },
-      });
+      if (repair_procedure === 'Repair unsuccessful') {
+        await sendPushToTokens(tokenValues, {
+          title: 'Request Unsuccessful',
+          body: `Repair request for ${year} ${make} ${model} has been unsuccessful.`,
+          data: { scanReference },
+        });
 
-      await Notification.create({
-        user_id: userID,
-        repair_shop_id: null,
-        title: 'Request Completed',
-        message: `Repair request for ${year} ${make} ${model} has been completed.`,
-        is_read: false,
-        created_at: dayjs().format(),
-      });
+        const newNotif = await Notification.create({
+          user_id: userID,
+          repair_shop_id: null,
+          title: 'Request Unsuccessful',
+          message: `Repair request for ${year} ${make} ${model} has been unsuccessful.`,
+          is_read: false,
+          created_at: dayjs().format(),
+        });
+
+        req.io.emit(`newNotif-CO-${userID}`, { newNotif });
+      } else {
+        await sendPushToTokens(tokenValues, {
+          title: 'Request Successful',
+          body: `Repair request for ${year} ${make} ${model} has been successful.`,
+          data: { scanReference },
+        });
+
+        const newNotif = await Notification.create({
+          user_id: userID,
+          repair_shop_id: null,
+          title: 'Request Successful',
+          message: `Repair request for ${year} ${make} ${model} has been successful.`,
+          is_read: false,
+          created_at: dayjs().format(),
+        });
+
+        req.io.emit(`newNotif-CO-${userID}`, { newNotif });
+      }
 
       res.sendStatus(200);
     };
@@ -257,4 +283,4 @@ export const requestCompleted = async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-}
+};
