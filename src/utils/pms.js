@@ -35,7 +35,7 @@ export const runPMSScheduler = () => {
 
             await sendPushToTokens(tokenValues, {
               title: 'PMS Reminder',
-              body: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Time for your scheduled PMS today!`,
+              body: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your preventive maintenance is due today. Please visit your preferred repair shop to keep your car in top condition.`,
               data: { vehicleID: vehicle.vehicle_id },
             });
 
@@ -43,7 +43,7 @@ export const runPMSScheduler = () => {
               user_id: user.user_id,
               repair_shop_id: null,
               title: 'PMS Reminder',
-              message: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Time for your scheduled PMS today!`,
+              message: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your preventive maintenance is due today. Please visit your preferred repair shop to keep your car in top condition.`,
               is_read: false,
               created_at: dayjs().format(),
             });
@@ -57,7 +57,7 @@ export const runPMSScheduler = () => {
 
             await sendPushToTokens(tokenValues, {
               title: 'PMS Overdue',
-              body: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your PMS is overdue!`,
+              body: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your preventive maintenance is overdue. Please visit your preferred repair shop to keep your car in top condition.`,
               data: { vehicleID: vehicle.vehicle_id },
             });
 
@@ -65,7 +65,7 @@ export const runPMSScheduler = () => {
               user_id: user.user_id,
               repair_shop_id: null,
               title: 'PMS Overdue',
-              message: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your PMS is overdue!`,
+              message: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your preventive maintenance is overdue. Please visit your preferred repair shop to keep your car in top condition.`,
               is_read: false,
               created_at: dayjs().format(),
             });

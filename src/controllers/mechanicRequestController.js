@@ -38,6 +38,46 @@ export const addRequest = async (req, res) => {
       latitude,
     });
 
+    const userRequest = await User.findOne({
+      where: { user_id: user_id },
+      include: [{
+        model: Vehicle,
+        required: true,
+        include: [{
+          model: VehicleDiagnostic,
+          required: true,
+          include: [{
+            model: MechanicRequest,
+            required: true,
+          }],
+        }],
+      }],
+    });
+
+    req.io.emit(`newRequest-CO-${user_id}`, { userRequest });
+
+    const shopRequest = await AutoRepairShop.findOne({
+      where: { repair_shop_id: repair_shop_id },
+      include: [{
+        model: MechanicRequest,
+        required: true,
+        include: [{
+          model: VehicleDiagnostic,
+          required: true,
+          include: [{
+            model: Vehicle,
+            required: true,
+            include: [{
+              model: User,
+              required: true,
+            }],
+          }],
+        }],
+      }],
+    });
+
+    req.io.emit(`newRequest-RS-${repair_shop_id}`, { shopRequest });
+
     const tokens = await SavePushToken.findAll({ where: { repair_shop_id: repair_shop_id } });
     const tokenValues = tokens.map(t => t.token);
 
@@ -47,7 +87,7 @@ export const addRequest = async (req, res) => {
       data: {},
     });
 
-    await Notification.create({
+    const newNotif = await Notification.create({
       user_id: null,
       repair_shop_id: repair_shop_id,
       title: 'New Repair Request',
@@ -55,6 +95,8 @@ export const addRequest = async (req, res) => {
       is_read: false,
       created_at: dayjs().format(),
     });
+
+    req.io.emit(`newNotif-RS-${repair_shop_id}`, { newNotif });
 
     res.sendStatus(201);
 
