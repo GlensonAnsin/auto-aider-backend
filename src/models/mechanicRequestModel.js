@@ -13,6 +13,8 @@ const MechanicRequest = sequelize.define('mechanic_request', {
   reason_rejected: { type: DataTypes.STRING },
   longitude: { type: DataTypes.STRING, allowNull: false },
   latitude: { type: DataTypes.STRING, allowNull: false },
+  is_rated: { type: DataTypes.BOOLEAN, allowNull: false },
+  score: { type: DataTypes.INTEGER },
 }, {
   tableName: 'mechanic_request',
   timestamps: false,

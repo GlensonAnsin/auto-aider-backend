@@ -286,7 +286,7 @@ export const requestCompleted = async (req, res) => {
       if (repair_procedure === 'Repair unsuccessful') {
         await sendPushToTokens(tokenValues, {
           title: 'Request Unsuccessful',
-          body: `Repair request for ${year} ${make} ${model} has been unsuccessful.`,
+          body: `Repair request for ${year} ${make} ${model} has been unsuccessful. Don't forget to rate the shop.`,
           data: { scanReference },
         });
 
@@ -294,7 +294,7 @@ export const requestCompleted = async (req, res) => {
           user_id: userID,
           repair_shop_id: null,
           title: 'Request Unsuccessful',
-          message: `Repair request for ${year} ${make} ${model} has been unsuccessful.`,
+          message: `Repair request for ${year} ${make} ${model} has been unsuccessful. Don't forget to rate the shop.`,
           is_read: false,
           created_at: dayjs().format(),
         });
@@ -303,7 +303,7 @@ export const requestCompleted = async (req, res) => {
       } else {
         await sendPushToTokens(tokenValues, {
           title: 'Request Successful',
-          body: `Repair request for ${year} ${make} ${model} has been successful.`,
+          body: `Repair request for ${year} ${make} ${model} has been successful. Don't forget to rate the shop.`,
           data: { scanReference },
         });
 
@@ -311,7 +311,7 @@ export const requestCompleted = async (req, res) => {
           user_id: userID,
           repair_shop_id: null,
           title: 'Request Successful',
-          message: `Repair request for ${year} ${make} ${model} has been successful.`,
+          message: `Repair request for ${year} ${make} ${model} has been successful. Don't forget to rate the shop.`,
           is_read: false,
           created_at: dayjs().format(),
         });

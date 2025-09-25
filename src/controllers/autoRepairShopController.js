@@ -1,4 +1,6 @@
-import { AutoRepairShop, User } from '../models/index.js';
+import { AutoRepairShop, User, SavePushToken, Notification, MechanicRequest } from '../models/index.js';
+import { sendPushToTokens } from "../utils/pushNotif.js";
+import dayjs from 'dayjs';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
@@ -57,7 +59,6 @@ export const createRepairShop = async (req, res) => {
     });
 
     res.sendStatus(201);
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -68,7 +69,6 @@ export const getAllRepairShops = async (req, res) => {
   try {
     const repairShops = await AutoRepairShop.findAll();
     res.json(repairShops);
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -81,7 +81,6 @@ export const getRepairShopInfo = async (req, res) => {
   try {
     const repairShopDetail = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
     res.status(200).json(repairShopDetail);
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -99,7 +98,6 @@ export const getShopInfoForChat = async (req, res) => {
       const shopInfo = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
       res.status(200).json(shopInfo);
     }
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -148,7 +146,6 @@ export const loginRepairShop = async (req, res) => {
       accessToken,
       refreshToken
     });
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -231,34 +228,83 @@ export const updateRepairShopInfo = async (req, res) => {
     await repairShop.update(updateData);
     req.io.emit(`updatedRepairShopInfo-RS-${repair_shop_id}`, { updatedRepairShopInfo: repairShop });
     return res.sendStatus(201);
-
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
 };
 
 export const updateRatings = async (req, res) => {
-  const repair_shop_id = req.user.repair_shop_id
+  const user_id = req.user.user_id
   const {
-    rate,
-    score
+    shopID,
+    requestID,
+    score,
   } = req.body;
 
   try {
-    const repairShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
+    const user = await User.findOne({ where: { user_id: user_id } });
 
-    await repairShop.update({
-      number_of_ratings: number_of_ratings + rate,
-      average_rating: total_score / number_of_ratings,
-      total_score: total_score + score
-    });
+    if (user) {
+      const repairShop = await AutoRepairShop.findOne({ where: { repair_shop_id: shopID } });
 
-    res.sendStatus(201);
+      await repairShop.update({
+        number_of_ratings: repairShop.number_of_ratings + 1,
+        average_rating: (repairShop.total_score + score) / (repairShop.number_of_ratings + 1),
+        total_score: repairShop.total_score + score
+      });
 
+      const tokens = await SavePushToken.findAll({ where: { repair_shop_id: shopID } });
+      const tokenValues = tokens.map(t => t.token);
+
+      await sendPushToTokens(tokenValues, {
+        title: 'You Got a New Rating',
+        body: `${user.firstname} ${user.lastname} gave your shop a ${score}-star rating.`,
+        data: {},
+      });
+
+      const newNotif = await Notification.create({
+        user_id: null,
+        repair_shop_id: shopID,
+        title: 'You Got a New Rating',
+        message: `${user.firstname} ${user.lastname} gave your shop a ${score}-star rating.`,
+        is_read: false,
+        created_at: dayjs().format(),
+      });
+
+      req.io.emit(`newNotif-RS-${shopID}`, { newNotif });
+
+      for (const id of requestID) {
+        const request = await MechanicRequest.findOne({ where: { mechanic_request_id: id } });
+        await request.update({
+          is_rated: true,
+          score: score,
+        });
+      }
+
+      res.sendStatus(201);
+    }
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 };
+
+export const updateAvailability = async (req, res) => {
+  const repair_shop_id = req.user.repair_shop_id;
+  const { availability } = req.body;
+  console.log(availability);
+
+  try {
+    const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
+
+    await shop.update({
+      availability: availability ? 'close' : 'open',
+    });
+    
+    res.sendStatus(201);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
 
 export const updateApprovalStatus = async (req, res) => {
   const {
@@ -277,7 +323,6 @@ export const updateApprovalStatus = async (req, res) => {
     });
 
     res.sendStatus(201);
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -310,7 +355,6 @@ export const refreshAccessToken = async (req, res) => {
     );
 
     res.json({ accessToken: newAccessToken });
-
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
