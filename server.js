@@ -100,7 +100,7 @@ io.on('connection', (socket) => {
 
   socket.on('sendMessage', async ({ senderID, receiverID, role, message, sentAt }) => {
     try {
-      await axios.post('http://192.168.0.100:3000/api/messages/send-message',
+      await axios.post('http://192.168.0.2:3000/api/messages/send-message',
         {
           senderID,
           receiverID,
@@ -121,7 +121,7 @@ io.on('connection', (socket) => {
 
   socket.on('updateStatus', async ({ chatIDs, status }) => {
     try {
-      await axios.patch('http://192.168.0.100:3000/api/messages/update-message-status',
+      await axios.patch('http://192.168.0.2:3000/api/messages/update-message-status',
         {
           chatIDs,
           status,
@@ -174,5 +174,5 @@ runPMSScheduler()
 // START SERVER
 const port = process.env.PORT || 3000;
 httpServer.listen(port, () => {
-  console.log(`Server is running on http://192.168.0.100:${port}`);
+  console.log(`Server is running on http://192.168.0.2:${port}`);
 });
