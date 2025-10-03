@@ -328,6 +328,40 @@ export const updateApprovalStatus = async (req, res) => {
   }
 };
 
+// RESET PASSWORD
+export const resetPassRS = async (req, res) => {
+  const {
+    number,
+    email,
+    authType,
+    newPassword,
+  } = req.body;
+
+  try {
+    if (authType === 'sms') {
+      const shop = await AutoRepairShop.findOne({ where: { mobile_num: number } });
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      await shop.update({
+        password: hashedPassword
+      });
+
+      res.sendStatus(201);
+    } else {
+      const shop = await AutoRepairShop.findOne({ where: { email: email } });
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      await shop.update({
+        password: hashedPassword
+      });
+
+      res.sendStatus(201);
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
 // REFRESH TOKEN
 export const refreshAccessToken = async (req, res) => {
   const { refreshToken } = req.body;
@@ -355,6 +389,43 @@ export const refreshAccessToken = async (req, res) => {
     );
 
     res.json({ accessToken: newAccessToken });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
+
+// CHECK EXISTENCE OF NUMBER OR EMAIL
+export const checkNumOrEmailRS = async (req, res) => {
+  const {
+    number,
+    email,
+    authType,
+  } = req.body;
+
+  try {
+    if (authType === 'sms') {
+      const shop = await AutoRepairShop.findOne({ where: { mobile_num: number } });
+      if (!shop) {
+        res.status(200).json({
+          isExist: false,
+        });
+      } else {
+        res.status(200).json({
+          isExist: true,
+        });
+      }
+    } else {
+      const shop = await AutoRepairShop.findOne({ where: { email: email } });
+      if (!shop) {
+        res.status(200).json({
+          isExist: false,
+        });
+      } else {
+        res.status(200).json({
+          isExist: true,
+        });
+      }
+    }
   } catch (e) {
     res.status(500).json({ message: e.message });
   }

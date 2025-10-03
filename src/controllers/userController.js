@@ -213,6 +213,40 @@ export const changePass = async (req, res) => {
   }
 };
 
+// RESET PASSWORD
+export const resetPassCO = async (req, res) => {
+  const {
+    number,
+    email,
+    authType,
+    newPassword,
+  } = req.body;
+
+  try {
+    if (authType === 'sms') {
+      const user = await User.findOne({ where: { mobile_num: number } });
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      await user.update({
+        password: hashedPassword
+      });
+
+      res.sendStatus(201);
+    } else {
+      const user = await User.findOne({ where: { email: email } });
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      await user.update({
+        password: hashedPassword
+      });
+
+      res.sendStatus(201);
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
 // REFRESH TOKEN
 export const refreshAccessToken = async (req, res) => {
   const { refreshToken } = req.body;
@@ -241,6 +275,43 @@ export const refreshAccessToken = async (req, res) => {
 
     res.json({ accessToken: newAccessToken });
 
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
+
+// CHECK EXISTENCE OF NUMBER OR EMAIL
+export const checkNumOrEmailCO = async (req, res) => {
+  const {
+    number,
+    email,
+    authType,
+  } = req.body;
+
+  try {
+    if (authType === 'sms') {
+      const user = await User.findOne({ where: { mobile_num: number } });
+      if (!user) {
+        res.status(200).json({
+          isExist: false,
+        });
+      } else {
+        res.status(200).json({
+          isExist: true,
+        });
+      }
+    } else {
+      const user = await User.findOne({ where: { email: email } });
+      if (!user) {
+        res.status(200).json({
+          isExist: false,
+        });
+      } else {
+        res.status(200).json({
+          isExist: true,
+        });
+      }
+    }
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
