@@ -13,6 +13,7 @@ import mechanicRequestRoutes from './src/routes/mechanicRequestRoutes.js';
 import chatMessageRoutes from './src/routes/chatMessageRoutes.js';
 import savePushTokenRoutes from './src/routes/savePushTokenRoutes.js';
 import notificationRoutes from './src/routes/notificationRoutes.js';
+import generateOtpRoutes from './src/routes/generateOtpRoutes.js';
 import axios from 'axios';
 import { onlineUsers, onlineShops } from './src/utils/onlineUsers.js';
 import { runPMSScheduler } from './src/utils/pms.js';
@@ -166,6 +167,7 @@ app.use('/api/mechanic_request', mechanicRequestRoutes);
 app.use('/api/messages', chatMessageRoutes);
 app.use('/api/notifications', savePushTokenRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/authentication', generateOtpRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
 
 // PMS SCHEDULER
