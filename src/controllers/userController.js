@@ -91,7 +91,7 @@ export const getUserInfoForChat = async (req, res) => {
   }
 };
 
-// LOGIN
+// USER LOGIN
 export const loginUser = async (req, res) => {
   const {
     username,
@@ -99,7 +99,52 @@ export const loginUser = async (req, res) => {
   } = req.body;
 
   try {
-    const user = await User.findOne({ where: { mobile_num: username } });
+    const user = await User.findOne({ where: { mobile_num: username, role: 'Car Owner' } });
+
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const accessToken = jwt.sign(
+      { user_id: user.user_id, role: user.role },
+      process.env.ACCESS_TOKEN,
+      { expiresIn: '1d' }
+    );
+
+    const refreshToken = jwt.sign(
+      { user_id: user.user_id },
+      process.env.REFRESH_TOKEN,
+      { expiresIn: '30d' }
+    );
+
+    const { password: _, ...userWithoutPassword } = user.toJSON();
+
+    res.status(200).json({
+      user: userWithoutPassword,
+      accessToken,
+      refreshToken
+    });
+
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+// ADMIN LOGIN
+export const loginAdmin = async (req, res) => {
+  const {
+    username,
+    password
+  } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { mobile_num: username, role: 'Admin' } });
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
