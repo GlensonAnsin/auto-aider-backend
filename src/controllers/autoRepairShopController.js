@@ -68,7 +68,23 @@ export const createRepairShop = async (req, res) => {
 export const getAllRepairShops = async (req, res) => {
   try {
     const repairShops = await AutoRepairShop.findAll();
-    res.json(repairShops);
+    res.status(200).json(repairShops);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+// GET ALL UNAPPROVED REPAIR SHOPS (ADMIN)
+export const getAllUnAppShops = async (req, res) => {
+  const user_id = req.user.user_id;
+
+  try {
+    const user = await User.findOne({ where: { user_id: user_id, role: 'Admin' } });
+
+    if (user) {
+      const shops = await AutoRepairShop.findAll({ where: { approval_status: 'Pending' } });
+      res.status(200).json(shops);
+    }
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

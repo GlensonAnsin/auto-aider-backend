@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllUsers, createUser, loginUser, refreshAccessToken, getUserInfo, updateUserInfo, changePass, getUserInfoForChat, checkNumOrEmailCO, resetPassCO, loginAdmin } from "../controllers/userController.js";
+import { getAllUsers, createUser, loginUser, refreshAccessToken, getUserInfo, updateUserInfo, changePass, getUserInfoForChat, checkNumOrEmailCO, resetPassCO, loginAdmin, getAdminInfo } from "../controllers/userController.js";
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -9,6 +9,7 @@ router.get('/get-all', getAllUsers);
 router.post('/login', loginUser);
 router.post('/login-admin', loginAdmin);
 router.get('/get-user-info', authMiddleware, getUserInfo);
+router.get('/get-admin-info', authMiddleware, getAdminInfo);
 router.patch('/update-user-info', authMiddleware, updateUserInfo);
 router.patch('/change-password', authMiddleware, changePass);
 router.get('/get-user-info-chat/:user_id', authMiddleware, getUserInfoForChat);

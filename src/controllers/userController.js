@@ -65,9 +65,21 @@ export const getUserInfo = async (req, res) => {
   const user_id = req.user.user_id;
 
   try {
-    const userDetail = await User.findOne({ where: { user_id: user_id } });
-    res.status(200).json(userDetail);
+    const user = await User.findOne({ where: { user_id: user_id, role: 'Car Owner' } });
+    res.status(200).json(user);
 
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+// GET ADMIN INFO
+export const getAdminInfo = async (req, res) => {
+  const user_id = req.user.user_id;
+
+  try {
+    const user = await User.findOne({ where: { user_id: user_id, role: 'Admin' } });
+    res.status(200).json(user);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
