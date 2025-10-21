@@ -102,6 +102,23 @@ export const getRepairShopInfo = async (req, res) => {
   }
 };
 
+// GET UNAPPROVED REPAIR SHOP INFO (ADMIN)
+export const getUnAppShopInfo = async (req, res) => {
+  const user_id = req.user.user_id;
+  const { shop_id } = req.params;
+
+  try {
+    const user = await User.findOne({ where: { user_id: user_id, role: 'Admin' } });
+
+    if (user) {
+      const shopDetail = await AutoRepairShop.findOne({ where: { repair_shop_id: shop_id } });
+      res.status(200).json(shopDetail);
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
 // GET REPAIR SHOP INFO FOR CHAT
 export const getShopInfoForChat = async (req, res) => {
   const user_id = req.user.user_id;
