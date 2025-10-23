@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllRepairShops, createRepairShop, loginRepairShop, getRepairShopInfo, updateRepairShopInfo, getShopInfoForChat, updateRatings, updateAvailability, checkNumOrEmailRS, resetPassRS, getAllUnAppShops, getUnAppShopInfo } from '../controllers/autoRepairShopController.js';
+import { getAllRepairShops, createRepairShop, loginRepairShop, getRepairShopInfo, updateRepairShopInfo, getShopInfoForChat, updateRatings, updateAvailability, checkNumOrEmailRS, resetPassRS, getAllUnAppShops, getUnAppShopInfo, updateApprovalStatus } from '../controllers/autoRepairShopController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -14,6 +14,7 @@ router.patch('/update-repair-shop-info', authMiddleware, updateRepairShopInfo);
 router.get('/get-shop-info-chat/:repair_shop_id', authMiddleware, getShopInfoForChat);
 router.patch('/update-ratings', authMiddleware, updateRatings);
 router.patch('/update-availability', authMiddleware, updateAvailability);
+router.patch('/update-approval-status', authMiddleware, updateApprovalStatus);
 router.post('/check-existence-rs', checkNumOrEmailRS);
 router.patch('/reset-pass-rs', resetPassRS);
 

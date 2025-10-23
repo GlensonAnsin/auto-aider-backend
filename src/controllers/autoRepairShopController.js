@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import axios from 'axios';
 
 dotenv.config();
 
@@ -150,7 +151,7 @@ export const loginRepairShop = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    if (repairShop.approval_status === 'Pending') {
+    if (repairShop.approval_status === 'Pending' || repairShop.approval_status === 'Rejected') {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
@@ -339,28 +340,6 @@ export const updateAvailability = async (req, res) => {
   }
 }
 
-export const updateApprovalStatus = async (req, res) => {
-  const {
-    repair_shop_id,
-    update
-  } = req.body;
-
-  try {
-    const repairShop = await AutoRepairShop.findOne({
-      where: { repair_shop_id: repair_shop_id },
-      attributes: ['approval_status'],
-    });
-
-    await repairShop.update({
-      approval_status: update
-    });
-
-    res.sendStatus(201);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-};
-
 // RESET PASSWORD
 export const resetPassRS = async (req, res) => {
   const {
@@ -387,6 +366,45 @@ export const resetPassRS = async (req, res) => {
       await shop.update({
         password: hashedPassword
       });
+
+      res.sendStatus(201);
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+// UPDATE APPROVAL STATUS (ADMIN)
+export const updateApprovalStatus = async (req, res) => {
+  const user_id = req.user.user_id;
+  const { shopID, decision } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { user_id: user_id, role: 'Admin' } });
+
+    if (user) {
+      const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: shopID } });
+
+      await shop.update({
+        creation_date: dayjs().format(),
+        approval_status: decision,
+      });
+
+      if (decision === 'Approved') {
+        await axios.post('https://api.semaphore.co/api/v4/messages', {
+          apikey: process.env.SEMAPHORE_API_KEY,
+          number: shop.mobile_num,
+          message: `Congratulations, ${shop.owner_firstname}! Your shop account has been approved. You can now log in to the app.`,
+          sendername: 'AutoAIDER'
+        });
+      } else {
+        await axios.post('https://api.semaphore.co/api/v4/messages', {
+          apikey: process.env.SEMAPHORE_API_KEY,
+          number: shop.mobile_num,
+          message: `Hello ${shop.owner_firstname}, We regret to inform you that your shop account request was not approved.`,
+          sendername: 'AutoAIDER'
+        });
+      }
 
       res.sendStatus(201);
     }
