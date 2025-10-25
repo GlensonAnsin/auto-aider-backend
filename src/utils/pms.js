@@ -36,7 +36,7 @@ export const runPMSScheduler = () => {
             await sendPushToTokens(tokenValues, {
               title: 'PMS Reminder',
               body: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your preventive maintenance is due today. Please visit your preferred repair shop to keep your car in top condition.`,
-              data: { vehicleID: vehicle.vehicle_id },
+              data: {},
             });
 
             await Notification.create({
@@ -58,7 +58,7 @@ export const runPMSScheduler = () => {
             await sendPushToTokens(tokenValues, {
               title: 'PMS Overdue',
               body: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your preventive maintenance is overdue. Please visit your preferred repair shop to keep your car in top condition.`,
-              data: { vehicleID: vehicle.vehicle_id },
+              data: {},
             });
 
             await Notification.create({

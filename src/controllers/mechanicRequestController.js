@@ -190,7 +190,7 @@ export const rejectRequest = async (req, res) => {
       await sendPushToTokens(tokenValues, {
         title: 'Request Rejected',
         body: `Repair request for ${year} ${make} ${model} has been rejected.`,
-        data: { scanReference },
+        data: {},
       });
 
       const newNotif = await Notification.create({
@@ -237,7 +237,7 @@ export const acceptRequest = async (req, res) => {
       await sendPushToTokens(tokenValues, {
         title: 'Request Accepted',
         body: `Repair request for ${year} ${make} ${model} has been accepted.`,
-        data: { scanReference },
+        data: {},
       });
 
       const newNotif = await Notification.create({
@@ -287,7 +287,7 @@ export const requestCompleted = async (req, res) => {
         await sendPushToTokens(tokenValues, {
           title: 'Request Unsuccessful',
           body: `Repair request for ${year} ${make} ${model} has been unsuccessful. Don't forget to rate the shop.`,
-          data: { scanReference },
+          data: {},
         });
 
         const newNotif = await Notification.create({
