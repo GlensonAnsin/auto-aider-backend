@@ -15,6 +15,8 @@ const MechanicRequest = sequelize.define('mechanic_request', {
   latitude: { type: DataTypes.STRING, allowNull: false },
   is_rated: { type: DataTypes.BOOLEAN, allowNull: false },
   score: { type: DataTypes.INTEGER },
+  request_type: { type: DataTypes.STRING, allowNull: false },
+  service_type: { type: DataTypes.STRING, allowNull: false },
 }, {
   tableName: 'mechanic_request',
   timestamps: false,

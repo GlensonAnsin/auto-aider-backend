@@ -16,6 +16,9 @@ export const addRequest = async (req, res) => {
     rejected_reason,
     longitude,
     latitude,
+    is_rated,
+    request_type,
+    service_type,
   } = req.body;
 
   try {
@@ -36,6 +39,9 @@ export const addRequest = async (req, res) => {
       rejected_reason,
       longitude,
       latitude,
+      is_rated,
+      request_type,
+      service_type,
     });
 
     const userRequest = await User.findOne({
@@ -167,7 +173,7 @@ export const getRequestsForRepairShop = async (req, res) => {
 // REJECT REQUEST
 export const rejectRequest = async (req, res) => {
   const repair_shop_id = req.user.repair_shop_id;
-  const { requestIDs, reason_rejected, scanReference, year, make, model, userID } = req.body;
+  const { requestIDs, reason_rejected, year, make, model, userID } = req.body;
 
   try {
     const repShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
@@ -215,7 +221,7 @@ export const rejectRequest = async (req, res) => {
 // ACCEPT REQUEST
 export const acceptRequest = async (req, res) => {
   const repair_shop_id = req.user.repair_shop_id;
-  const { requestIDs, scanReference, year, make, model, userID } = req.body;
+  const { requestIDs, year, make, model, userID } = req.body;
 
   try {
     const repShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
@@ -262,7 +268,7 @@ export const acceptRequest = async (req, res) => {
 // REQUEST COMPLETED
 export const requestCompleted = async (req, res) => {
   const repair_shop_id = req.user.repair_shop_id;
-  const { requestIDs, repair_procedure, completed_on, scanReference, year, make, model, userID } = req.body;
+  const { requestIDs, repair_procedure, completed_on, year, make, model, userID } = req.body;
 
   try {
     const repShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
@@ -304,7 +310,7 @@ export const requestCompleted = async (req, res) => {
         await sendPushToTokens(tokenValues, {
           title: 'Request Successful',
           body: `Repair request for ${year} ${make} ${model} has been successful. Don't forget to rate the shop.`,
-          data: { scanReference },
+          data: {},
         });
 
         const newNotif = await Notification.create({

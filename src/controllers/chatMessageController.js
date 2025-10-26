@@ -57,7 +57,7 @@ export const getConversationForShop = async (req, res) => {
 
 // GET ALL CONVERSATIONS FOR CAR OWNER
 export const getAllConversationsCO = async (req, res) => {
-  const user_id = req.user.user_id;;
+  const user_id = req.user.user_id;
   
   try {
     const user = await User.findOne({ where: { user_id: user_id } });
@@ -224,6 +224,38 @@ export const getAllConversationsRS = async (req, res) => {
       res.status(200).json(groupedChatInfoData);
     }
 
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+// COUNT ALL UNREAD CHAT FROM CAR OWNER
+export const countUnreadChatCO = async (req, res) => {
+  const user_id = req.user.user_id;
+
+  try {
+    const user = await User.findOne({ where: { user_id: user_id } });
+
+    if (user) {
+      const unreadChats = await ChatMessage.count({ receiver_user_id: user_id, status: 'unread' });
+      res.status(200).json(unreadChats);
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+// COUNT ALL UNREAD CHAT FROM REPAIR SHOP
+export const countUnreadChatRS = async (req, res) => {
+  const repair_shop_id = req.user.repair_shop_id;
+
+  try {
+    const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
+
+    if (shop) {
+      const unreadChats = await ChatMessage.count({ receiver_repair_shop_id: repair_shop_id, status: 'unread' });
+      res.status(200).json(unreadChats);
+    }
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

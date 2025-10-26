@@ -1,6 +1,6 @@
 import express from 'express';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
-import { getConversationForCarOwner, getConversationForShop, sendMessage, getAllConversationsCO, getAllConversationsRS, updateMessageStatus } from '../controllers/chatMessageController.js';
+import { getConversationForCarOwner, getConversationForShop, sendMessage, getAllConversationsCO, getAllConversationsRS, updateMessageStatus, countUnreadChatCO, countUnreadChatRS } from '../controllers/chatMessageController.js';
 
 const router = express.Router();
 
@@ -8,6 +8,8 @@ router.get('/get-conversation-co/:repair_shop_id', authMiddleware, getConversati
 router.get('/get-conversation-rs/:user_id', authMiddleware, getConversationForShop);
 router.get('/get-all-chats-co', authMiddleware, getAllConversationsCO);
 router.get('/get-all-chats-rs', authMiddleware, getAllConversationsRS);
+router.get('/count-unread-chats-co', authMiddleware, countUnreadChatCO);
+router.get('/count-unread-chats-rs', authMiddleware, countUnreadChatRS);
 router.post('/send-message', sendMessage);
 router.patch('/update-message-status', updateMessageStatus);
 
