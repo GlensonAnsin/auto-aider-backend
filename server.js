@@ -171,7 +171,7 @@ app.use('/api/authentication', generateOtpRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
 
 // PMS SCHEDULER
-runPMSScheduler()
+runPMSScheduler(io);
 
 // START SERVER
 const port = process.env.PORT || 3000;

@@ -306,6 +306,8 @@ export const updateRatings = async (req, res) => {
       });
 
       req.io.emit(`newNotif-RS-${shopID}`, { newNotif });
+      const unreadNotifs = await Notification.count({ where: { repair_shop_id: shopID, is_read: false } });
+      req.io.emi(`newUnreadNotif-RS-${shopID}`, { unreadNotifs });
 
       for (const id of requestID) {
         const request = await MechanicRequest.findOne({ where: { mechanic_request_id: id } });

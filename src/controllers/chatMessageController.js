@@ -237,7 +237,7 @@ export const countUnreadChatCO = async (req, res) => {
     const user = await User.findOne({ where: { user_id: user_id } });
 
     if (user) {
-      const unreadChats = await ChatMessage.count({ receiver_user_id: user_id, status: 'unread' });
+      const unreadChats = await ChatMessage.count({ where: { receiver_user_id: user_id, status: 'unread' } });
       res.status(200).json(unreadChats);
     }
   } catch (e) {
@@ -253,7 +253,7 @@ export const countUnreadChatRS = async (req, res) => {
     const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
 
     if (shop) {
-      const unreadChats = await ChatMessage.count({ receiver_repair_shop_id: repair_shop_id, status: 'unread' });
+      const unreadChats = await ChatMessage.count({ where: { receiver_repair_shop_id: repair_shop_id, status: 'unread' } });
       res.status(200).json(unreadChats);
     }
   } catch (e) {
@@ -303,6 +303,10 @@ export const sendMessage = async (req, res) => {
 
       req.io.emit('receiveMessageCO', { newChatCO });
       req.io.emit('receiveMessageRS', { newChatRS });
+      const unreadChatsCO = await ChatMessage.count({ where: { receiver_user_id: receiverID, status: 'unread' } });
+      const unreadChatsRS = await ChatMessage.count({ where: { receiver_repair_shop_id: receiverID, status: 'unread' } });
+      req.io.emit(`newUnreadChat-CO-${receiverID}`, { unreadChatsCO });
+      req.io.emit(`newUnreadChat-RS-${receiverID}`, { unreadChatsRS });
 
       const allChatsCO = await ChatMessage.findAll({
         where: {
@@ -495,6 +499,11 @@ export const sendMessage = async (req, res) => {
 
       req.io.emit('receiveMessageRS', { newChatRS });
       req.io.emit('receiveMessageCO', { newChatCO });
+      const unreadChatsRS = await ChatMessage.count({ where: { receiver_repair_shop_id: receiverID, status: 'unread' } });
+      const unreadChatsCO = await ChatMessage.count({ where: { receiver_user_id: receiverID, status: 'unread' } });
+      req.io.emit(`newUnreadChat-RS-${receiverID}`, { unreadChatsRS });
+      req.io.emit(`newUnreadChat-CO-${receiverID}`, { unreadChatsCO });
+
 
       const allChatsRS = await ChatMessage.findAll({
         where: {
@@ -666,19 +675,30 @@ export const updateMessageStatus = async (req, res) => {
 
     for (const id of chatIDs) {
       const chat = await ChatMessage.findOne({ where: { chat_id: id } })
+
       await chat.update({
         status: status,
       });
+
       updatedChat.push({
         chatID: id,
         status: status,
       });
+
+      if (chat.receiver_user_id) {
+        const unreadChatsCO = await ChatMessage.count({ where: { receiver_user_id: chat.receiver_user_id, status: 'unread' } });
+        req.io.emit(`newUnreadChat-CO-${chat.receiver_user_id}`, { unreadChatsCO });
+      } else {
+        const unreadChatsRS = await ChatMessage.count({ where: { receiver_repair_shop_id: chat.receiver_repair_shop_id, status: 'unread' } });
+        req.io.emit(`newUnreadChat-RS-${chat.receiver_user_id}`, { unreadChatsRS });
+      }
     }
 
     req.io.emit('updatedMessage', { updatedChat });
+
     res.sendStatus(201);
 
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-}
+};

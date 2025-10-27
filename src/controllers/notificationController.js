@@ -74,9 +74,13 @@ export const updateNotificationStatusCO = async (req, res) => {
 
     if (user) {
       const notification = await Notification.findOne({ where: { notification_id: notificationID } });
+
       await notification.update({
         is_read: true,
       });
+
+      const unreadNotifs = await Notification.count({ where: { user_id: user_id, is_read: false } });
+      req.io.emit(`newUnreadNotif-CO-${user_id}`, { unreadNotifs });
       res.sendStatus(200);
     }
   } catch (e) {
@@ -90,16 +94,21 @@ export const updateNotificationStatusRS = async (req, res) => {
   const { notificationID } = req.body;
 
   try {
-    const shop = await AutoRepairShop.findOneA({ where: { repair_shop_id: repair_shop_id } });
+    const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
 
     if (shop) {
       const notification = await Notification.findOne({ where: { notification_id: notificationID } });
+
       await notification.update({
         is_read: true,
       });
+
+      const unreadNotifs = await Notification.count({ where: { repair_shop_id: repair_shop_id, is_read: false } });
+      req.io.emit(`newUnreadNotif-RS-${repair_shop_id}`, { unreadNotifs });
       res.sendStatus(200);
     }
   } catch (e) {
+    console.log(e);
     res.status(500).json({ error: e.message });
   }
 };
@@ -115,6 +124,9 @@ export const deleteNotificationCO = async (req, res) => {
     if (user) {
       const notification = await Notification.findOne({ where: { notification_id: notificationID } });
       await notification.destroy();
+
+      const unreadNotifs = await Notification.count({ where: { user_id: user_id, is_read: false } });
+      req.io.emit(`newUnreadNotif-CO-${user_id}`, { unreadNotifs });
       res.sendStatus(200);
     }
   } catch (e) {
@@ -133,6 +145,9 @@ export const deleteNotificationRS = async (req, res) => {
     if (shop) {
       const notification = await Notification.findOne({ where: { notification_id: notificationID } });
       await notification.destroy();
+
+      const unreadNotifs = await Notification.count({ where: { repair_shop_id: repair_shop_id, is_read: false } });
+      req.io.emit(`newUnreadNotif-RS-${repair_shop_id}`, { unreadNotifs });
       res.sendStatus(200);
     }
   } catch (e) {

@@ -10,7 +10,7 @@ router.get('/count-unread-notifs-co', authMiddleware, countUnreadNotifCO);
 router.get('/count-unread-notifs-rs', authMiddleware, countUnreadNotifRS);
 router.patch('/update-notification-co', authMiddleware, updateNotificationStatusCO);
 router.patch('/update-notification-rs', authMiddleware, updateNotificationStatusRS);
-router.delete('/delete-notificaion-co', authMiddleware, deleteNotificationCO);
-router.delete('/delete-notificaion-rs', authMiddleware, deleteNotificationRS);
+router.delete('/delete-notification-co', authMiddleware, deleteNotificationCO);
+router.delete('/delete-notification-rs', authMiddleware, deleteNotificationRS);
 
 export default router;

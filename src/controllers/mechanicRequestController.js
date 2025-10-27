@@ -103,7 +103,8 @@ export const addRequest = async (req, res) => {
     });
 
     req.io.emit(`newNotif-RS-${repair_shop_id}`, { newNotif });
-
+    const unreadNotifs = await Notification.count({ where: { repair_shop_id: repair_shop_id, is_read: false } });
+    req.io.emi(`newUnreadNotif-RS-${repair_shop_id}`, { unreadNotifs });
     res.sendStatus(201);
 
   } catch (e) {
@@ -209,7 +210,8 @@ export const rejectRequest = async (req, res) => {
       });
 
       req.io.emit(`newNotif-CO-${userID}`, { newNotif });
-
+      const unreadNotifs = await Notification.count({ where: { user_id: userID, is_read: false } });
+      req.io.emi(`newUnreadNotif-CO-${userID}`, { unreadNotifs });
       res.sendStatus(200);
     };
 
@@ -256,7 +258,8 @@ export const acceptRequest = async (req, res) => {
       });
 
       req.io.emit(`newNotif-CO-${userID}`, { newNotif });
-
+      const unreadNotifs = await Notification.count({ where: { user_id: userID, is_read: false } });
+      req.io.emi(`newUnreadNotif-CO-${userID}`, { unreadNotifs });
       res.sendStatus(200);
     };
 
@@ -268,7 +271,7 @@ export const acceptRequest = async (req, res) => {
 // REQUEST COMPLETED
 export const requestCompleted = async (req, res) => {
   const repair_shop_id = req.user.repair_shop_id;
-  const { requestIDs, repair_procedure, completed_on, year, make, model, userID } = req.body;
+  const { requestIDs, repair_procedure, completed_on, vehicleID, year, make, model, userID, requestType } = req.body;
 
   try {
     const repShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
@@ -282,6 +285,13 @@ export const requestCompleted = async (req, res) => {
           completed_on: completed_on,
         });
       };
+
+      if (requestType === 'Preventive Maintenance Service') {
+        const vehicle = await Vehicle.findOne({ where: { vehicle_id: vehicleID } });
+        await vehicle.update({
+          last_pms_trigger: dayjs().format()
+        });
+      }
 
       req.io.emit(`requestCompleted-CO-${userID}`, { requestIDs, repair_procedure, completed_on });
       req.io.emit(`requestCompleted-RS-${repair_shop_id}`, { requestIDs, repair_procedure, completed_on });
@@ -325,6 +335,8 @@ export const requestCompleted = async (req, res) => {
         req.io.emit(`newNotif-CO-${userID}`, { newNotif });
       }
 
+      const unreadNotifs = await Notification.count({ where: { user_id: userID, is_read: false } });
+      req.io.emit(`newUnreadNotif-CO-${userID}`, { unreadNotifs });
       res.sendStatus(200);
     };
 

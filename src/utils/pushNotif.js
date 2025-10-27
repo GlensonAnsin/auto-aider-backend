@@ -2,7 +2,7 @@ import { Expo } from 'expo-server-sdk';
 
 const expo = new Expo();
 
-export const sendPushToTokens = async (tokens = [], { title, body, data = {} }) => {
+export const sendPushToTokens = async (tokens = [], { title, body, data = {}, categoryId, }) => {
   const messages = [];
   for (const token of tokens) {
     if (!Expo.isExpoPushToken(token)) {
@@ -16,6 +16,7 @@ export const sendPushToTokens = async (tokens = [], { title, body, data = {} }) 
       body,
       data,
       channelId: 'default',
+      categoryId,
     });
   }
 

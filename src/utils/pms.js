@@ -7,7 +7,7 @@ import { Notification } from '../models/index.js';
 
 dayjs.extend(utc);
 
-export const runPMSScheduler = () => {
+export const runPMSScheduler = (io) => {
   const getNextPMSDate = (lastPMSTrigger) => {
     return dayjs(lastPMSTrigger).add(3, 'month').utc(true).local();
   }
@@ -36,10 +36,14 @@ export const runPMSScheduler = () => {
             await sendPushToTokens(tokenValues, {
               title: 'PMS Reminder',
               body: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your preventive maintenance is due today. Please visit your preferred repair shop to keep your car in top condition.`,
-              data: {},
+              data: {
+                type: 'PMS_REMINDER',
+                vehicleId: vehicle.vehicle_id,
+              },
+              categoryId: 'pmsReminder',
             });
 
-            await Notification.create({
+            const newNotif = await Notification.create({
               user_id: user.user_id,
               repair_shop_id: null,
               title: 'PMS Reminder',
@@ -47,6 +51,10 @@ export const runPMSScheduler = () => {
               is_read: false,
               created_at: dayjs().format(),
             });
+
+            io.emit(`newNotif-CO-${user.user_id}`, { newNotif });
+            const unreadNotifs = await Notification.count({ where: { user_id: user.user_id, is_read: false } });
+            io.emit(`newUnreadNotif-CO-${user.user_id}`, { unreadNotifs });
           })();
         }
 
@@ -58,10 +66,14 @@ export const runPMSScheduler = () => {
             await sendPushToTokens(tokenValues, {
               title: 'PMS Overdue',
               body: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your preventive maintenance is overdue. Please visit your preferred repair shop to keep your car in top condition.`,
-              data: {},
+              data: {
+                type: 'PMS_REMINDER',
+                vehicleId: vehicle.vehicle_id,
+              },
+              categoryId: 'pmsReminder',
             });
 
-            await Notification.create({
+            const newNotif = await Notification.create({
               user_id: user.user_id,
               repair_shop_id: null,
               title: 'PMS Overdue',
@@ -69,6 +81,10 @@ export const runPMSScheduler = () => {
               is_read: false,
               created_at: dayjs().format(),
             });
+
+            io.emit(`newNotif-CO-${user.user_id}`, { newNotif });
+            const unreadNotifs = await Notification.count({ where: { user_id: user.user_id, is_read: false } });
+            io.emit(`newUnreadNotif-CO-${user.user_id}`, { unreadNotifs });
           })();
         }
       });

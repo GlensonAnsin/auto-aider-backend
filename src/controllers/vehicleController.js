@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { Vehicle, User } from "../models/index.js";
 
 // ADD VEHICLE
@@ -65,6 +66,25 @@ export const getScannedVehicle = async (req, res) => {
       res.status(200).json(scannedVehicle);
     }
 
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
+
+// DISMISS PMS
+export const dismissPms = async (req, res) => {
+  const user_id = req.user.user_id;
+  const { vehicleID } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { user_id: user_id } });
+
+    if (user) {
+      const vehicle = await Vehicle.findOne({ where: { vehicle_id: vehicleID } });
+      await vehicle.update({
+        last_pms_trigger: dayjs().format()
+      });
+    }
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
