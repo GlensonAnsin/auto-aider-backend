@@ -42,7 +42,7 @@ export const generateOtp = async (req, res) => {
             <p>This code will expire in <strong>5 minutes</strong>.</p>
             <p>Please do not share this code with anyone. If you did not request this, please ignore this email. Your account is safe, and no further action is needed.</p>
             <br/>
-            <p>Thanks,<br/>Auto AIDER Support Team</p>
+            <p>Thanks,<br/>Auto AIDER</p>
           </div>
         `,
       });

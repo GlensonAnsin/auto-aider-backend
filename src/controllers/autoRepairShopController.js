@@ -30,7 +30,9 @@ export const createRepairShop = async (req, res) => {
     total_score,
     profile_bg,
     availability,
-    is_deleted
+    is_deleted,
+    settings_map_type,
+    settings_push_notif,
   } = req.body;
 
   try {
@@ -57,6 +59,8 @@ export const createRepairShop = async (req, res) => {
       profile_bg,
       availability,
       is_deleted,
+      settings_map_type,
+      settings_push_notif,
     });
 
     res.sendStatus(201);

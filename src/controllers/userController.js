@@ -19,8 +19,8 @@ export const createUser = async (req, res) => {
     role,
     user_initials_bg,
     is_deleted,
-    longitude,
-    latitude,
+    settings_map_type,
+    settings_push_notif,
   } = req.body;
 
   try {
@@ -38,8 +38,8 @@ export const createUser = async (req, res) => {
       role,
       user_initials_bg,
       is_deleted,
-      longitude,
-      latitude
+      settings_map_type,
+      settings_push_notif,
     });
 
     res.sendStatus(201);

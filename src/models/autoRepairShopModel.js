@@ -23,6 +23,8 @@ const AutoRepairShop = sequelize.define('auto_repair_shop', {
   profile_bg: { type: DataTypes.STRING(7), allowNull: false },
   availability: { type: DataTypes.STRING(10), allowNull: false },
   is_deleted: { type: DataTypes.BOOLEAN, allowNull: false },
+  settings_map_type: { type: DataTypes.STRING, allowNull: false },
+  settings_push_notif: { type: DataTypes.BOOLEAN, allowNull: false },
 }, {
   tableName: 'auto_repair_shop',
   timestamps: false,
