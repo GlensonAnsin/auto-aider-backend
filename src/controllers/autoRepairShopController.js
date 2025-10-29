@@ -72,7 +72,7 @@ export const createRepairShop = async (req, res) => {
 // GET ALL REPAIR SHOPS
 export const getAllRepairShops = async (req, res) => {
   try {
-    const repairShops = await AutoRepairShop.findAll();
+    const repairShops = await AutoRepairShop.findAll({ where: { is_deleted: false } });
     res.status(200).json(repairShops);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -149,7 +149,7 @@ export const loginRepairShop = async (req, res) => {
   } = req.body;
 
   try {
-    const repairShop = await AutoRepairShop.findOne({ where: { mobile_num: username } });
+    const repairShop = await AutoRepairShop.findOne({ where: { mobile_num: username , is_deleted: false} });
 
     if (!repairShop) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -291,14 +291,16 @@ export const updateRatings = async (req, res) => {
         total_score: repairShop.total_score + score
       });
 
-      const tokens = await SavePushToken.findAll({ where: { repair_shop_id: shopID } });
-      const tokenValues = tokens.map(t => t.token);
+      if (Boolean(repairShop.settings_push_notif)) {
+        const tokens = await SavePushToken.findAll({ where: { repair_shop_id: shopID } });
+        const tokenValues = tokens.map(t => t.token);
 
-      await sendPushToTokens(tokenValues, {
-        title: 'You Got a New Rating',
-        body: `${user.firstname} ${user.lastname} gave your shop a ${score}-star rating.`,
-        data: {},
-      });
+        await sendPushToTokens(tokenValues, {
+          title: 'You Got a New Rating',
+          body: `${user.firstname} ${user.lastname} gave your shop a ${score}-star rating.`,
+          data: {},
+        });
+      }
 
       const newNotif = await Notification.create({
         user_id: null,
@@ -311,7 +313,7 @@ export const updateRatings = async (req, res) => {
 
       req.io.emit(`newNotif-RS-${shopID}`, { newNotif });
       const unreadNotifs = await Notification.count({ where: { repair_shop_id: shopID, is_read: false } });
-      req.io.emi(`newUnreadNotif-RS-${shopID}`, { unreadNotifs });
+      req.io.emit(`newUnreadNotif-RS-${shopID}`, { unreadNotifs });
 
       for (const id of requestID) {
         const request = await MechanicRequest.findOne({ where: { mechanic_request_id: id } });
@@ -331,7 +333,6 @@ export const updateRatings = async (req, res) => {
 export const updateAvailability = async (req, res) => {
   const repair_shop_id = req.user.repair_shop_id;
   const { availability } = req.body;
-  console.log(availability);
 
   try {
     const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
@@ -482,6 +483,68 @@ export const checkNumOrEmailRS = async (req, res) => {
           isExist: true,
         });
       }
+    }
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
+
+// UPDATE SETTINGS MAP TYPE FOR SHOP
+export const updateMapTypeRS = async (req, res) => {
+  const repair_shop_id = req.user.repair_shop_id;
+  const { mapType } = req.body;
+
+  try {
+    const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
+
+    if (shop) {
+      await shop.update({
+        settings_map_type: mapType,
+      });
+
+      req.io.emit(`updatedMapType-RS-${repair_shop_id}`, { mapType });
+      res.sendStatus(201);
+    }
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
+
+// UPDATE SETTINGS PUSH NOTIF FOR SHOP
+export const updatePushNotifRS = async (req, res) => {
+  const repair_shop_id = req.user.repair_shop_id;
+  const { pushNotif } = req.body;
+
+  try {
+    const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
+
+    if (shop) {
+      await shop.update({
+        settings_push_notif: pushNotif ? false : true,
+      });
+
+      const updatedPushNotif = !pushNotif;
+      req.io.emit(`updatedPushNotif-RS-${repair_shop_id}`, { updatedPushNotif });
+      res.sendStatus(201);
+    }
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
+
+// DELETE SHOP ACCOUNT
+export const deleteAccountRS = async (req, res) => {
+  const repair_shop_id = req.user.repair_shop_id;
+
+  try {
+    const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
+
+    if (shop) {
+      await shop.update({
+        is_deleted: true,
+      });
+
+      res.sendStatus(200);
     }
   } catch (e) {
     res.status(500).json({ message: e.message });

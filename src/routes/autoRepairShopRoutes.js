@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllRepairShops, createRepairShop, loginRepairShop, getRepairShopInfo, updateRepairShopInfo, getShopInfoForChat, updateRatings, updateAvailability, checkNumOrEmailRS, resetPassRS, getAllUnAppShops, getUnAppShopInfo, updateApprovalStatus } from '../controllers/autoRepairShopController.js';
+import { getAllRepairShops, createRepairShop, loginRepairShop, getRepairShopInfo, updateRepairShopInfo, getShopInfoForChat, updateRatings, updateAvailability, checkNumOrEmailRS, resetPassRS, getAllUnAppShops, getUnAppShopInfo, updateApprovalStatus, updateMapTypeRS, updatePushNotifRS, deleteAccountRS } from '../controllers/autoRepairShopController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -17,5 +17,8 @@ router.patch('/update-availability', authMiddleware, updateAvailability);
 router.patch('/update-approval-status', authMiddleware, updateApprovalStatus);
 router.post('/check-existence-rs', checkNumOrEmailRS);
 router.patch('/reset-pass-rs', resetPassRS);
+router.post('/update-map-type', authMiddleware, updateMapTypeRS);
+router.post('/update-push-notif', authMiddleware, updatePushNotifRS);
+router.get('/delete-account', authMiddleware, deleteAccountRS);
 
 export default router;

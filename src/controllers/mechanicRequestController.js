@@ -83,15 +83,18 @@ export const addRequest = async (req, res) => {
     });
 
     req.io.emit(`newRequest-RS-${repair_shop_id}`, { shopRequest });
+    const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
 
-    const tokens = await SavePushToken.findAll({ where: { repair_shop_id: repair_shop_id } });
-    const tokenValues = tokens.map(t => t.token);
+    if (Boolean(shop.settings_push_notif)) {
+      const tokens = await SavePushToken.findAll({ where: { repair_shop_id: repair_shop_id } });
+      const tokenValues = tokens.map(t => t.token);
 
-    await sendPushToTokens(tokenValues, {
-      title: 'New Repair Request',
-      body: `You got a new repair request from ${user.firstname} ${user.lastname}.`,
-      data: {},
-    });
+      await sendPushToTokens(tokenValues, {
+        title: 'New Repair Request',
+        body: `You got a new repair request from ${user.firstname} ${user.lastname}.`,
+        data: {},
+      });
+    }
 
     const newNotif = await Notification.create({
       user_id: null,
@@ -104,7 +107,7 @@ export const addRequest = async (req, res) => {
 
     req.io.emit(`newNotif-RS-${repair_shop_id}`, { newNotif });
     const unreadNotifs = await Notification.count({ where: { repair_shop_id: repair_shop_id, is_read: false } });
-    req.io.emi(`newUnreadNotif-RS-${repair_shop_id}`, { unreadNotifs });
+    req.io.emit(`newUnreadNotif-RS-${repair_shop_id}`, { unreadNotifs });
     res.sendStatus(201);
 
   } catch (e) {
@@ -191,14 +194,18 @@ export const rejectRequest = async (req, res) => {
       req.io.emit(`requestRejected-CO-${userID}`, { requestIDs, reason_rejected });
       req.io.emit(`requestRejected-RS-${repair_shop_id}`, { requestIDs, reason_rejected });
 
-      const tokens = await SavePushToken.findAll({ where: { user_id: userID } });
-      const tokenValues = tokens.map(t => t.token);
+      const user = await User.findOne({ where: { user_id: userID } });
 
-      await sendPushToTokens(tokenValues, {
-        title: 'Request Rejected',
-        body: `Repair request for ${year} ${make} ${model} has been rejected.`,
-        data: {},
-      });
+      if (Boolean(user.settings_push_notif)) {
+        const tokens = await SavePushToken.findAll({ where: { user_id: userID } });
+        const tokenValues = tokens.map(t => t.token);
+
+        await sendPushToTokens(tokenValues, {
+          title: 'Request Rejected',
+          body: `Repair request for ${year} ${make} ${model} has been rejected.`,
+          data: {},
+        });
+      }
 
       const newNotif = await Notification.create({
         user_id: userID,
@@ -211,7 +218,7 @@ export const rejectRequest = async (req, res) => {
 
       req.io.emit(`newNotif-CO-${userID}`, { newNotif });
       const unreadNotifs = await Notification.count({ where: { user_id: userID, is_read: false } });
-      req.io.emi(`newUnreadNotif-CO-${userID}`, { unreadNotifs });
+      req.io.emit(`newUnreadNotif-CO-${userID}`, { unreadNotifs });
       res.sendStatus(200);
     };
 
@@ -239,14 +246,18 @@ export const acceptRequest = async (req, res) => {
       req.io.emit(`requestAccepted-CO-${userID}`, { requestIDs });
       req.io.emit(`requestAccepted-RS-${repair_shop_id}`, { requestIDs });
 
-      const tokens = await SavePushToken.findAll({ where: { user_id: userID } });
-      const tokenValues = tokens.map(t => t.token);
+      const user = await User.findOne({ where: { user_id: userID } });
 
-      await sendPushToTokens(tokenValues, {
-        title: 'Request Accepted',
-        body: `Repair request for ${year} ${make} ${model} has been accepted.`,
-        data: {},
-      });
+      if (Boolean(user.settings_push_notif)) {
+        const tokens = await SavePushToken.findAll({ where: { user_id: userID } });
+        const tokenValues = tokens.map(t => t.token);
+
+        await sendPushToTokens(tokenValues, {
+          title: 'Request Accepted',
+          body: `Repair request for ${year} ${make} ${model} has been accepted.`,
+          data: {},
+        });
+      }
 
       const newNotif = await Notification.create({
         user_id: userID,
@@ -259,7 +270,7 @@ export const acceptRequest = async (req, res) => {
 
       req.io.emit(`newNotif-CO-${userID}`, { newNotif });
       const unreadNotifs = await Notification.count({ where: { user_id: userID, is_read: false } });
-      req.io.emi(`newUnreadNotif-CO-${userID}`, { unreadNotifs });
+      req.io.emit(`newUnreadNotif-CO-${userID}`, { unreadNotifs });
       res.sendStatus(200);
     };
 
@@ -296,15 +307,18 @@ export const requestCompleted = async (req, res) => {
       req.io.emit(`requestCompleted-CO-${userID}`, { requestIDs, repair_procedure, completed_on });
       req.io.emit(`requestCompleted-RS-${repair_shop_id}`, { requestIDs, repair_procedure, completed_on });
 
+      const user = await User.findOne({ where: { user_id: userID } });
       const tokens = await SavePushToken.findAll({ where: { user_id: userID } });
       const tokenValues = tokens.map(t => t.token);
 
       if (repair_procedure === 'Repair unsuccessful') {
-        await sendPushToTokens(tokenValues, {
-          title: 'Request Unsuccessful',
-          body: `Repair request for ${year} ${make} ${model} has been unsuccessful. Don't forget to rate the shop.`,
-          data: {},
-        });
+        if (Boolean(user.settings_push_notif)) {
+          await sendPushToTokens(tokenValues, {
+            title: 'Request Unsuccessful',
+            body: `Repair request for ${year} ${make} ${model} has been unsuccessful. Don't forget to rate the shop.`,
+            data: {},
+          });
+        }
 
         const newNotif = await Notification.create({
           user_id: userID,
@@ -317,11 +331,13 @@ export const requestCompleted = async (req, res) => {
 
         req.io.emit(`newNotif-CO-${userID}`, { newNotif });
       } else {
-        await sendPushToTokens(tokenValues, {
-          title: 'Request Successful',
-          body: `Repair request for ${year} ${make} ${model} has been successful. Don't forget to rate the shop.`,
-          data: {},
-        });
+        if (Boolean(user.settings_push_notif)) {
+          await sendPushToTokens(tokenValues, {
+            title: 'Request Successful',
+            body: `Repair request for ${year} ${make} ${model} has been successful. Don't forget to rate the shop.`,
+            data: {},
+          });
+        }
 
         const newNotif = await Notification.create({
           user_id: userID,

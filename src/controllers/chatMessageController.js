@@ -451,14 +451,18 @@ export const sendMessage = async (req, res) => {
       const isOnline = onlineShops.some(s => s.shopID === receiverID);
 
       if (!isOnline) {
-        const tokens = await SavePushToken.findAll({ where: { repair_shop_id: receiverID } });
-        const tokenValues = tokens.map(t => t.token);
+        const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: receiverID } });
 
-        await sendPushToTokens(tokenValues, {
-          title: 'New Message',
-          body: message,
-          data: {},
-        });
+        if (Boolean(shop.settings_push_notif)) {
+          const tokens = await SavePushToken.findAll({ where: { repair_shop_id: receiverID } });
+          const tokenValues = tokens.map(t => t.token);
+
+          await sendPushToTokens(tokenValues, {
+            title: 'New Message',
+            body: message,
+            data: {},
+          });
+        }
       }
 
       res.sendStatus(201);
@@ -648,14 +652,18 @@ export const sendMessage = async (req, res) => {
       const isOnline = onlineUsers.some(u => u.userID === receiverID);
 
       if (!isOnline) {
-        const tokens = await SavePushToken.findAll({ where: { user_id: receiverID } });
-        const tokenValues = tokens.map(t => t.token);
+        const user = await User.findOne({ where: { user_id: receiverID } });
 
-        await sendPushToTokens(tokenValues, {
-          title: 'New Message',
-          body: message,
-          data: {},
-        });
+        if (Boolean(user.settings_push_notif)) {
+          const tokens = await SavePushToken.findAll({ where: { user_id: receiverID } });
+          const tokenValues = tokens.map(t => t.token);
+
+          await sendPushToTokens(tokenValues, {
+            title: 'New Message',
+            body: message,
+            data: {},
+          });
+        }
       }
 
       res.sendStatus(201);

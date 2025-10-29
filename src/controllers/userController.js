@@ -52,7 +52,7 @@ export const createUser = async (req, res) => {
 // GET ALL USERS
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.findAll();
+    const users = await User.findAll({where: { role: 'Car Owner', is_deleted: false }});
     res.status(200).json(users);
 
   } catch (e) {
@@ -111,7 +111,7 @@ export const loginUser = async (req, res) => {
   } = req.body;
 
   try {
-    const user = await User.findOne({ where: { mobile_num: username, role: 'Car Owner' } });
+    const user = await User.findOne({ where: { mobile_num: username, role: 'Car Owner', is_deleted: false } });
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -207,7 +207,7 @@ export const updateUserInfo = async (req, res) => {
   } = req.body;
 
   try {
-    const user = await User.findOne({ where: { user_id } });
+    const user = await User.findOne({ where: { user_id: user_id } });
     let updateData = {};
 
     switch (field) {
@@ -368,6 +368,68 @@ export const checkNumOrEmailCO = async (req, res) => {
           isExist: true,
         });
       }
+    }
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
+
+// UPDATE SETTINGS MAP TYPE FOR CAR OWNER
+export const updateMapTypeCO = async (req, res) => {
+  const user_id = req.user.user_id;
+  const { mapType } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { user_id: user_id } });
+
+    if (user) {
+      await user.update({
+        settings_map_type: mapType,
+      });
+
+      req.io.emit(`updatedMapType-CO-${user_id}`, { mapType });
+      res.sendStatus(201);
+    }
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
+
+// UPDATE SETTINGS PUSH NOTIF FOR CAR OWNER
+export const updatePushNotifCO = async (req, res) => {
+  const user_id = req.user.user_id;
+  const { pushNotif } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { user_id: user_id } });
+
+    if (user) {
+      await user.update({
+        settings_push_notif: pushNotif ? false : true,
+      });
+
+      const updatedPushNotif = !pushNotif;
+      req.io.emit(`updatedPushNotif-CO-${user_id}`, { updatedPushNotif });
+      res.sendStatus(201);
+    }
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
+
+// DELETE CAR OWNER ACCOUNT
+export const deleteAccountCO = async (req, res) => {
+  const user_id = req.user.user_id;
+
+  try {
+    const user = await User.findOne({ where: { user_id: user_id } });
+
+    if (user) {
+      await user.update({
+        is_deleted: true,
+      });
+
+      res.sendStatus(200);
     }
   } catch (e) {
     res.status(500).json({ message: e.message });

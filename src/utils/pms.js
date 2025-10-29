@@ -30,18 +30,22 @@ export const runPMSScheduler = (io) => {
 
         if (now.isSame(dayjs(nextPMS), 'day')) {
           (async () => {
-            const tokens = await SavePushToken.findAll({ where: { user_id: user.user_id } });
-            const tokenValues = tokens.map(t => t.token);
+            const user = await User.findOne({ where: { user_id: user.user_id } });
 
-            await sendPushToTokens(tokenValues, {
-              title: 'PMS Reminder',
-              body: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your preventive maintenance is due today. Please visit your preferred repair shop to keep your car in top condition.`,
-              data: {
-                type: 'PMS_REMINDER',
-                vehicleId: vehicle.vehicle_id,
-              },
-              categoryId: 'pmsReminder',
-            });
+            if (Boolean(user.settings_push_notif)) {
+              const tokens = await SavePushToken.findAll({ where: { user_id: user.user_id } });
+              const tokenValues = tokens.map(t => t.token);
+
+              await sendPushToTokens(tokenValues, {
+                title: 'PMS Reminder',
+                body: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your preventive maintenance is due today. Please visit your preferred repair shop to keep your car in top condition.`,
+                data: {
+                  type: 'PMS_REMINDER',
+                  vehicleId: vehicle.vehicle_id,
+                },
+                categoryId: 'pmsReminder',
+              });
+            }
 
             const newNotif = await Notification.create({
               user_id: user.user_id,
@@ -60,18 +64,22 @@ export const runPMSScheduler = (io) => {
 
         if (now.isAfter(dayjs(nextPMS), 'day')) {
           (async () => {
-            const tokens = await SavePushToken.findAll({ where: { user_id: user.user_id } });
-            const tokenValues = tokens.map(t => t.token);
+            const user = await User.findOne({ where: { user_id: user.user_id } });
 
-            await sendPushToTokens(tokenValues, {
-              title: 'PMS Overdue',
-              body: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your preventive maintenance is overdue. Please visit your preferred repair shop to keep your car in top condition.`,
-              data: {
-                type: 'PMS_REMINDER',
-                vehicleId: vehicle.vehicle_id,
-              },
-              categoryId: 'pmsReminder',
-            });
+            if (Boolean(user.settings_push_notif)) {
+              const tokens = await SavePushToken.findAll({ where: { user_id: user.user_id } });
+              const tokenValues = tokens.map(t => t.token);
+
+              await sendPushToTokens(tokenValues, {
+                title: 'PMS Overdue',
+                body: `${vehicle.year} ${vehicle.make} ${vehicle.model}: Your preventive maintenance is overdue. Please visit your preferred repair shop to keep your car in top condition.`,
+                data: {
+                  type: 'PMS_REMINDER',
+                  vehicleId: vehicle.vehicle_id,
+                },
+                categoryId: 'pmsReminder',
+              });
+            }
 
             const newNotif = await Notification.create({
               user_id: user.user_id,
