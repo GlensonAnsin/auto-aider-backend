@@ -176,5 +176,5 @@ runPMSScheduler(io);
 // START SERVER
 const port = process.env.PORT || 3000;
 httpServer.listen(port, () => {
-  console.log(`Server is running on http://192.168.0.2:${port}`);
+  console.log(`Server is running...`);
 });
