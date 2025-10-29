@@ -168,7 +168,7 @@ export const loginRepairShop = async (req, res) => {
     const accessToken = jwt.sign(
       { repair_shop_id: repairShop.repair_shop_id },
       process.env.ACCESS_TOKEN,
-      { expiresIn: '1d' }
+      { expiresIn: '30d' }
     );
 
     const refreshToken = jwt.sign(
