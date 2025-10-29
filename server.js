@@ -101,7 +101,7 @@ io.on('connection', (socket) => {
 
   socket.on('sendMessage', async ({ senderID, receiverID, role, message, sentAt }) => {
     try {
-      await axios.post('http://192.168.0.2:3000/api/messages/send-message',
+      await axios.post('https://auto-aider-backend.onrender.com/api/messages/send-message',
         {
           senderID,
           receiverID,
@@ -122,7 +122,7 @@ io.on('connection', (socket) => {
 
   socket.on('updateStatus', async ({ chatIDs, status }) => {
     try {
-      await axios.patch('http://192.168.0.2:3000/api/messages/update-message-status',
+      await axios.patch('https://auto-aider-backend.onrender.com/api/messages/update-message-status',
         {
           chatIDs,
           status,
