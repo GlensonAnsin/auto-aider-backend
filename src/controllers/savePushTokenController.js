@@ -12,7 +12,7 @@ export const saveToken = async (req, res) => {
       token: token,
     });
 
-    res.sendStatus(200);
+    res.sendStatus(201);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
