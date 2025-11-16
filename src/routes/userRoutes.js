@@ -1,5 +1,23 @@
 import express from 'express';
-import { getAllUsers, createUser, loginUser, refreshAccessToken, getUserInfo, updateUserInfo, changePass, getUserInfoForChat, checkNumOrEmailCO, resetPassCO, loginAdmin, getAdminInfo, updateMapTypeCO, updatePushNotifCO, deleteAccountCO } from "../controllers/userController.js";
+import {
+  getAllUsers,
+  createUser,
+  loginUser,
+  refreshAccessToken,
+  getUserInfo,
+  updateUserInfo,
+  changePass,
+  getUserInfoForChat,
+  checkNumOrEmailCO,
+  resetPassCO,
+  loginAdmin,
+  getAdminInfo,
+  updateMapTypeCO,
+  updatePushNotifCO,
+  deleteAccountCO,
+  countAllCO,
+  newlyRegisteredCO
+} from "../controllers/userController.js";
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -19,5 +37,7 @@ router.patch('/reset-pass-co', resetPassCO);
 router.post('/update-map-type', authMiddleware, updateMapTypeCO);
 router.post('/update-push-notif', authMiddleware, updatePushNotifCO);
 router.get('/delete-account', authMiddleware, deleteAccountCO);
+router.get('/count-all-co', authMiddleware, countAllCO);
+router.get('/newly-registered-co', authMiddleware, newlyRegisteredCO);
 
 export default router;

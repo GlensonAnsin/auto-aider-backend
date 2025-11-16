@@ -2,7 +2,10 @@ import { AutoRepairShop, User } from '../models/index.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import dayjs from "dayjs";
+import utc from 'dayjs/plugin/utc.js';
 
+dayjs.extend(utc);
 dotenv.config();
 
 // SIGNUP
@@ -43,7 +46,6 @@ export const createUser = async (req, res) => {
     });
 
     res.sendStatus(201);
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -54,7 +56,6 @@ export const getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll({where: { role: 'Car Owner', is_deleted: false }});
     res.status(200).json(users);
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -67,7 +68,6 @@ export const getUserInfo = async (req, res) => {
   try {
     const user = await User.findOne({ where: { user_id: user_id, role: 'Car Owner' } });
     res.status(200).json(user);
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -97,7 +97,6 @@ export const getUserInfoForChat = async (req, res) => {
       const userInfo = await User.findOne({ where: { user_id: user_id } });
       res.status(200).json(userInfo);
     }
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -105,10 +104,7 @@ export const getUserInfoForChat = async (req, res) => {
 
 // USER LOGIN
 export const loginUser = async (req, res) => {
-  const {
-    username,
-    password
-  } = req.body;
+  const { username, password } = req.body;
 
   try {
     const user = await User.findOne({ where: { mobile_num: username, role: 'Car Owner', is_deleted: false } });
@@ -142,7 +138,6 @@ export const loginUser = async (req, res) => {
       accessToken,
       refreshToken
     });
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -150,10 +145,7 @@ export const loginUser = async (req, res) => {
 
 // ADMIN LOGIN
 export const loginAdmin = async (req, res) => {
-  const {
-    username,
-    password
-  } = req.body;
+  const { username, password } = req.body;
 
   try {
     const user = await User.findOne({ where: { mobile_num: username, role: 'Admin' } });
@@ -187,7 +179,6 @@ export const loginAdmin = async (req, res) => {
       accessToken,
       refreshToken
     });
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -236,7 +227,6 @@ export const updateUserInfo = async (req, res) => {
     await user.update(updateData);
     req.io.emit(`updatedUserInfo-CO-${user_id}`, { updatedUserInfo: user });
     return res.sendStatus(201);
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -244,10 +234,7 @@ export const updateUserInfo = async (req, res) => {
 
 export const changePass = async (req, res) => {
   const user_id = req.user.user_id;
-  const {
-    newPassword,
-    currentPassword
-  } = req.body;
+  const { newPassword, currentPassword } = req.body;
 
   try {
     const user = await User.findOne({ where: { user_id: user_id } });
@@ -264,7 +251,6 @@ export const changePass = async (req, res) => {
     });
 
     res.sendStatus(201);
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -331,7 +317,6 @@ export const refreshAccessToken = async (req, res) => {
     );
 
     res.json({ accessToken: newAccessToken });
-
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
@@ -339,11 +324,7 @@ export const refreshAccessToken = async (req, res) => {
 
 // CHECK EXISTENCE OF NUMBER OR EMAIL
 export const checkNumOrEmailCO = async (req, res) => {
-  const {
-    number,
-    email,
-    authType,
-  } = req.body;
+  const { number, email, authType } = req.body;
 
   try {
     if (authType === 'sms') {
@@ -433,5 +414,66 @@ export const deleteAccountCO = async (req, res) => {
     }
   } catch (e) {
     res.status(500).json({ message: e.message });
+  }
+};
+
+//COUNT ALL CAR OWNERS (ADMIN)
+export const countAllCO = async (req, res) => {
+  const user_id = req.user.user_id;
+
+  try {
+    const user = await User.findOne({ where: { user_id: user_id } });
+
+    if (user) {
+      const allUsers = await User.count({ where: { role: 'Car Owner', is_deleted: false } });
+      res.status(200).json(allUsers);
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+// COUNT ALL NEWLY REGISTERED CAR OWNERS IN THE PAST 12 MONTHS (ADMIN)
+export const newlyRegisteredCO = async (req, res) => {
+  const user_id = req.user.user_id;
+
+  try {
+    const user = await User.findOne({ where: { user_id: user_id } });
+
+    if (user) {
+      const allUsers = await User.findAll({ where: { role: 'Car Owner' } });
+      const newUsersThisYear = allUsers.filter((item) => dayjs(item.creation_date).utc(true).format('YYYY') === dayjs().utc(true).format('YYYY'));
+      const jan = newUsersThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Jan');
+      const feb = newUsersThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Feb');
+      const mar = newUsersThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Mar');
+      const apr = newUsersThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Apr');
+      const may = newUsersThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'May');
+      const jun = newUsersThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Jun');
+      const jul = newUsersThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Jul');
+      const aug = newUsersThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Aug');
+      const sep = newUsersThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Sep');
+      const oct = newUsersThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Oct');
+      const nov = newUsersThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Nov');
+      const dec = newUsersThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Dec');
+
+      const newUsersPerMonth = {
+        jan: [...jan].length,
+        feb: [...feb].length,
+        mar: [...mar].length,
+        apr: [...apr].length,
+        may: [...may].length,
+        jun: [...jun].length,
+        jul: [...jul].length,
+        aug: [...aug].length,
+        sep: [...sep].length,
+        oct: [...oct].length,
+        nov: [...nov].length,
+        dec: [...dec].length,
+      }
+
+      res.status(200).json(newUsersPerMonth);
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 };

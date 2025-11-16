@@ -1,5 +1,12 @@
 import express from 'express';
-import { addRequest, getRequestsForCarOwner, getRequestsForRepairShop, rejectRequest, acceptRequest, requestCompleted } from '../controllers/mechanicRequestController.js';
+import {
+  addRequest,
+  getRequestsForCarOwner,
+  getRequestsForRepairShop,
+  rejectRequest,
+  acceptRequest,
+  requestCompleted
+} from '../controllers/mechanicRequestController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();

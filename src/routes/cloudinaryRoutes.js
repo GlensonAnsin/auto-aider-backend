@@ -1,5 +1,9 @@
 import epxress from 'express';
-import { generateSignature, deleteProfilePic, generateSignatureForShopImages } from '../controllers/cloudinaryController.js';
+import {
+  generateSignature,
+  deleteProfilePic,
+  generateSignatureForShopImages
+} from '../controllers/cloudinaryController.js';
 
 const router = epxress.Router();
 

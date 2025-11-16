@@ -1,4 +1,12 @@
-import { AutoRepairShop, MechanicRequest, User, Vehicle, VehicleDiagnostic, Notification, SavePushToken } from '../models/index.js';
+import {
+  AutoRepairShop,
+  MechanicRequest,
+  User,
+  Vehicle,
+  VehicleDiagnostic,
+  Notification,
+  SavePushToken
+} from '../models/index.js';
 import { sendPushToTokens } from "../utils/pushNotif.js";
 import dayjs from 'dayjs';
 
@@ -109,7 +117,6 @@ export const addRequest = async (req, res) => {
     const unreadNotifs = await Notification.count({ where: { repair_shop_id: repair_shop_id, is_read: false } });
     req.io.emit(`newUnreadNotif-RS-${repair_shop_id}`, { unreadNotifs });
     res.sendStatus(201);
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -137,7 +144,6 @@ export const getRequestsForCarOwner = async (req, res) => {
     });
 
     res.status(200).json(user);
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -168,7 +174,6 @@ export const getRequestsForRepairShop = async (req, res) => {
     });
 
     res.status(200).json(repShop);
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -177,7 +182,14 @@ export const getRequestsForRepairShop = async (req, res) => {
 // REJECT REQUEST
 export const rejectRequest = async (req, res) => {
   const repair_shop_id = req.user.repair_shop_id;
-  const { requestIDs, reason_rejected, year, make, model, userID } = req.body;
+  const {
+    requestIDs,
+    reason_rejected,
+    year,
+    make,
+    model,
+    userID
+  } = req.body;
 
   try {
     const repShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
@@ -221,7 +233,6 @@ export const rejectRequest = async (req, res) => {
       req.io.emit(`newUnreadNotif-CO-${userID}`, { unreadNotifs });
       res.sendStatus(200);
     };
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -230,7 +241,13 @@ export const rejectRequest = async (req, res) => {
 // ACCEPT REQUEST
 export const acceptRequest = async (req, res) => {
   const repair_shop_id = req.user.repair_shop_id;
-  const { requestIDs, year, make, model, userID } = req.body;
+  const {
+    requestIDs,
+    year,
+    make,
+    model,
+    userID
+  } = req.body;
 
   try {
     const repShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
@@ -273,7 +290,6 @@ export const acceptRequest = async (req, res) => {
       req.io.emit(`newUnreadNotif-CO-${userID}`, { unreadNotifs });
       res.sendStatus(200);
     };
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -282,7 +298,17 @@ export const acceptRequest = async (req, res) => {
 // REQUEST COMPLETED
 export const requestCompleted = async (req, res) => {
   const repair_shop_id = req.user.repair_shop_id;
-  const { requestIDs, repair_procedure, completed_on, vehicleID, year, make, model, userID, requestType } = req.body;
+  const {
+    requestIDs,
+    repair_procedure,
+    completed_on,
+    vehicleID,
+    year,
+    make,
+    model,
+    userID,
+    requestType
+  } = req.body;
 
   try {
     const repShop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
@@ -355,7 +381,6 @@ export const requestCompleted = async (req, res) => {
       req.io.emit(`newUnreadNotif-CO-${userID}`, { unreadNotifs });
       res.sendStatus(200);
     };
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

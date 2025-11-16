@@ -1,5 +1,14 @@
 import express from 'express';
-import { getNotificationsCO, getNotificationsRS, updateNotificationStatusCO, updateNotificationStatusRS, deleteNotificationCO, deleteNotificationRS, countUnreadNotifCO, countUnreadNotifRS } from '../controllers/notificationController.js';
+import {
+  getNotificationsCO,
+  getNotificationsRS,
+  updateNotificationStatusCO,
+  updateNotificationStatusRS,
+  deleteNotificationCO,
+  deleteNotificationRS,
+  countUnreadNotifCO,
+  countUnreadNotifRS
+} from '../controllers/notificationController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();

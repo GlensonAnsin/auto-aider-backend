@@ -1,4 +1,9 @@
-import { AutoRepairShop, ChatMessage, SavePushToken, User } from "../models/index.js";
+import {
+  AutoRepairShop,
+  ChatMessage,
+  SavePushToken,
+  User
+} from "../models/index.js";
 import { Op } from "sequelize";
 import { sendPushToTokens } from "../utils/pushNotif.js";
 import { onlineUsers, onlineShops } from "../utils/onlineUsers.js";
@@ -23,7 +28,6 @@ export const getConversationForCarOwner = async (req, res) => {
       });
       res.status(200).json(conversation);
     }
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -49,7 +53,6 @@ export const getConversationForShop = async (req, res) => {
       });
       res.status(200).json(conversation);
     }
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -135,7 +138,6 @@ export const getAllConversationsCO = async (req, res) => {
 
       res.status(200).json(groupedChatInfoData);
     }
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -223,7 +225,6 @@ export const getAllConversationsRS = async (req, res) => {
 
       res.status(200).json(groupedChatInfoData);
     }
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -263,7 +264,13 @@ export const countUnreadChatRS = async (req, res) => {
 
 // SEND AND RECEIVE MESSAGE
 export const sendMessage = async (req, res) => {
-  const { senderID, receiverID, role, message, sentAt } = req.body;
+  const {
+    senderID,
+    receiverID,
+    role,
+    message,
+    sentAt
+  } = req.body;
 
   try {
     if (role === 'car-owner') {
@@ -668,7 +675,6 @@ export const sendMessage = async (req, res) => {
 
       res.sendStatus(201);
     }
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -703,9 +709,7 @@ export const updateMessageStatus = async (req, res) => {
     }
 
     req.io.emit('updatedMessage', { updatedChat });
-
     res.sendStatus(201);
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

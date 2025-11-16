@@ -1,5 +1,13 @@
 import express from 'express';
-import { addVehicleDiagnostic, getVehicleDiagnostics, getOnVehicleDiagnostic, getOnSpecificVehicleDiagnostic, deleteVehicleDiagnostic, deleteAllVehicleDiagnostics  } from '../controllers/vehicleDiagnosticController.js';
+import {
+  addVehicleDiagnostic,
+  getVehicleDiagnostics,
+  getOnVehicleDiagnostic,
+  getOnSpecificVehicleDiagnostic,
+  deleteVehicleDiagnostic,
+  deleteAllVehicleDiagnostics,
+  countScansToday
+} from '../controllers/vehicleDiagnosticController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -10,5 +18,6 @@ router.get('/get-on-vehicle-diagnostic/:vehicle_id/:scan_reference', authMiddlew
 router.get('/get-on-spec-vehicle-diagnostic/:vehicle_diagnostic_id', authMiddleware, getOnSpecificVehicleDiagnostic)
 router.patch('/delete-vehicle-diagnostic', authMiddleware, deleteVehicleDiagnostic);
 router.patch('/delete-all-vehicle-diagnostics', authMiddleware, deleteAllVehicleDiagnostics);
+router.get('/count-scans-today', authMiddleware, countScansToday);
 
 export default router;

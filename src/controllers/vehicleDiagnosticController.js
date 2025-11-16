@@ -1,4 +1,8 @@
 import { VehicleDiagnostic, Vehicle, User } from "../models/index.js";
+import dayjs from "dayjs";
+import utc from 'dayjs/plugin/utc.js';
+
+dayjs.extend(utc);
 
 // ADD VEHICLE DIAGNOSTIC
 export const addVehicleDiagnostic = async (req, res) => {
@@ -35,7 +39,6 @@ export const addVehicleDiagnostic = async (req, res) => {
 
       res.sendStatus(201);
     };
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -75,7 +78,6 @@ export const getVehicleDiagnostics = async (req, res) => {
     });
 
     res.status(200).json(diagnosticsWithVehicle);
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -96,7 +98,6 @@ export const getOnVehicleDiagnostic = async (req, res) => {
       const onVehicleDiagnostic = await VehicleDiagnostic.findAll({ where: { vehicle_id: vehicle_id, scan_reference: scan_reference } });
       res.status(200).json(onVehicleDiagnostic);
     }
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -114,7 +115,6 @@ export const getOnSpecificVehicleDiagnostic = async (req, res) => {
       const onSpecificVehicleDiag = await VehicleDiagnostic.findOne({ where: { vehicle_diagnostic_id: vehicle_diagnostic_id } });
       res.status(200).json(onSpecificVehicleDiag);
     }
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -141,7 +141,6 @@ export const deleteVehicleDiagnostic = async (req, res) => {
       req.io.emit(`vehicleDiagnosticDeleted-CO-${user_id}`, { deletedVehicleDiag: deletedVehicleDiag });
       res.sendStatus(200);
     }
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -188,7 +187,42 @@ export const deleteAllVehicleDiagnostics = async (req, res) => {
 
     req.io.emit(`allVehicleDiagnosticDeleted-CO-${user_id}`, { allDeletedVehicleDiag: allDeletedVehicleDiag });
     res.sendStatus(200);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
 
+// COUNT ALL SCANS TODAY (ADMIN)
+export const countScansToday = async (req, res) => {
+  const user_id = req.user.user_id;
+  
+  try {
+    const user = await User.findOne({ where: { user_id: user_id } });
+
+    if (user) {
+      const scans = await VehicleDiagnostic.findAll();
+      const filterToday = scans.filter((item) => dayjs(item.date).utc(true).isSame(dayjs().utc(true), 'day'));
+
+      const grouped = Object.values(
+        [...filterToday].reduce(
+          (acc, item) => {
+            const ref = item.scan_reference;
+
+            if (!acc[ref]) {
+              acc[ref] = {
+                scan_reference: ref,
+              }
+            };
+
+            return acc;
+          },
+          {}
+        )
+      );
+
+      const countScansToday = grouped.length;
+      res.status(200).json(countScansToday);
+    }
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

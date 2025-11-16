@@ -1,4 +1,10 @@
-import { AutoRepairShop, User, SavePushToken, Notification, MechanicRequest } from '../models/index.js';
+import {
+  AutoRepairShop,
+  User,
+  SavePushToken,
+  Notification,
+  MechanicRequest
+} from '../models/index.js';
 import { sendPushToTokens } from "../utils/pushNotif.js";
 import dayjs from 'dayjs';
 import bcrypt from 'bcryptjs';
@@ -143,10 +149,7 @@ export const getShopInfoForChat = async (req, res) => {
 
 // LOGIN REPAIR SHOP
 export const loginRepairShop = async (req, res) => {
-  const {
-    username,
-    password
-  } = req.body;
+  const { username, password } = req.body;
 
   try {
     const repairShop = await AutoRepairShop.findOne({ where: { mobile_num: username , is_deleted: false} });
@@ -548,5 +551,66 @@ export const deleteAccountRS = async (req, res) => {
     }
   } catch (e) {
     res.status(500).json({ message: e.message });
+  }
+};
+
+//COUNT ALL REGISTERED REPAIR SHOPS (ADMIN)
+export const countAllRS = async (req, res) => {
+  const user_id = req.user.user_id;
+
+  try {
+    const user = await User.findOne({ where: { user_id: user_id } });
+
+    if (user) {
+      const allShops = await AutoRepairShop.count({ where: { approval_status: 'Approved',is_deleted: false } });
+      res.status(200).json(allShops);
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+// COUNT ALL NEWLY REGISTERED REPAIR SHOPS IN THE PAST 12 MONTHS (ADMIN)
+export const newlyRegisteredRS = async (req, res) => {
+  const user_id = req.user.user_id;
+
+  try {
+    const user = await User.findOne({ where: { user_id: user_id } });
+
+    if (user) {
+      const allShops = await AutoRepairShop.findAll({ where: { approval_status: 'Approved' } });
+      const newShopsThisYear = allShops.filter((item) => dayjs(item.creation_date).utc(true).format('YYYY') === dayjs().utc(true).format('YYYY'));
+      const jan = newShopsThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Jan');
+      const feb = newShopsThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Feb');
+      const mar = newShopsThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Mar');
+      const apr = newShopsThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Apr');
+      const may = newShopsThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'May');
+      const jun = newShopsThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Jun');
+      const jul = newShopsThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Jul');
+      const aug = newShopsThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Aug');
+      const sep = newShopsThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Sep');
+      const oct = newShopsThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Oct');
+      const nov = newShopsThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Nov');
+      const dec = newShopsThisYear.filter((item) => dayjs(item.creation_date).utc(true).format('MMM') === 'Dec');
+
+      const newShopsPerMonth = {
+        jan: [...jan].length,
+        feb: [...feb].length,
+        mar: [...mar].length,
+        apr: [...apr].length,
+        may: [...may].length,
+        jun: [...jun].length,
+        jul: [...jul].length,
+        aug: [...aug].length,
+        sep: [...sep].length,
+        oct: [...oct].length,
+        nov: [...nov].length,
+        dec: [...dec].length,
+      }
+
+      res.status(200).json(newShopsPerMonth);
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 };

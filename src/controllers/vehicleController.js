@@ -33,7 +33,6 @@ export const addVehicle = async (req, res) => {
       req.io.emit(`updatedVehicleList-CO-${user_id}`, { updatedVehicleList });
       res.sendStatus(201);
     }
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -47,7 +46,6 @@ export const getVehicles = async (req, res) => {
     const userVehicle = await Vehicle.findAll({ where: { user_id: user_id } });
     const filterDeleted = userVehicle.filter((item) => item.is_deleted !== true);
     res.status(200).json(filterDeleted);
-
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
@@ -65,7 +63,6 @@ export const getScannedVehicle = async (req, res) => {
       const scannedVehicle = await Vehicle.findOne({ where: { vehicle_id: vehicle_id } });
       res.status(200).json(scannedVehicle);
     }
-
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
@@ -121,7 +118,6 @@ export const deleteVehicle = async (req, res) => {
 
       res.sendStatus(200);
     }
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

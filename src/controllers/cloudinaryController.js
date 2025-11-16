@@ -26,7 +26,6 @@ export const generateSignature = async (req, res) => {
       cloudName: process.env.CLOUDINARY_CLOUD_NAME,
       folder: 'profile-pictures',
     });
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -49,7 +48,6 @@ export const generateSignatureForShopImages = async (req, res) => {
       cloudName: process.env.CLOUDINARY_CLOUD_NAME,
       folder: 'shop-images',
     });
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -61,7 +59,6 @@ export const deleteProfilePic = async (req, res) => {
   try {
     const res = await cloudinary.uploader.destroy(public_id);
     res.status(200)
-
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

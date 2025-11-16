@@ -1,6 +1,15 @@
 import express from 'express';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
-import { getConversationForCarOwner, getConversationForShop, sendMessage, getAllConversationsCO, getAllConversationsRS, updateMessageStatus, countUnreadChatCO, countUnreadChatRS } from '../controllers/chatMessageController.js';
+import {
+  getConversationForCarOwner,
+  getConversationForShop,
+  sendMessage,
+  getAllConversationsCO,
+  getAllConversationsRS,
+  updateMessageStatus,
+  countUnreadChatCO,
+  countUnreadChatRS
+} from '../controllers/chatMessageController.js';
 
 const router = express.Router();
 

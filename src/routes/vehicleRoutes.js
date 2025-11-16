@@ -1,5 +1,11 @@
 import express from 'express';
-import { addVehicle, getVehicles, getScannedVehicle, dismissPms, deleteVehicle } from '../controllers/vehicleController.js';
+import {
+  addVehicle,
+  getVehicles,
+  getScannedVehicle,
+  dismissPms,
+  deleteVehicle
+} from '../controllers/vehicleController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
