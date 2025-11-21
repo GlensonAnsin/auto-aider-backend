@@ -17,7 +17,8 @@ import {
   updatePushNotifRS,
   deleteAccountRS,
   countAllRS,
-  newlyRegisteredRS
+  newlyRegisteredRS,
+  getAllShopsForAdmin,
 } from '../controllers/autoRepairShopController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
@@ -25,6 +26,7 @@ const router = express.Router();
 
 router.post('/signup', createRepairShop);
 router.get('/get-all', getAllRepairShops);
+router.get('/get-all-admin', getAllRepairShops);
 router.get('/get-all-unapproved-shops', authMiddleware, getAllUnAppShops);
 router.post('/login', loginRepairShop);
 router.get('/get-repair-shop-info', authMiddleware, getRepairShopInfo);
