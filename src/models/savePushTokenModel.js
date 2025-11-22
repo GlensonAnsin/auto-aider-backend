@@ -7,7 +7,7 @@ const SavePushToken = sequelize.define('save_push_token', {
   repair_shop_id: { type: DataTypes.BIGINT, unique: true },
   platform: { type: DataTypes.STRING(20), allowNull: false },
   updated_at: { type: DataTypes.DATE, allowNull: false },
-  token: { type: DataTypes.STRING, allowNull: false, unique: true },
+  token: { type: DataTypes.STRING, allowNull: false },
 }, {
   tableName: 'save_push_token',
   timestamps: false,
