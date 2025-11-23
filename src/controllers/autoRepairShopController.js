@@ -560,6 +560,7 @@ export const deleteAccountRS = async (req, res) => {
 
     if (shop) {
       await shop.update({
+        mobile_num: 'Unknown Number',
         is_deleted: true,
       });
 

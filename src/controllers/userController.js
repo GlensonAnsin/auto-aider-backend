@@ -407,6 +407,7 @@ export const deleteAccountCO = async (req, res) => {
 
     if (user) {
       await user.update({
+        mobile_num: 'Unknown Number',
         is_deleted: true,
       });
 
