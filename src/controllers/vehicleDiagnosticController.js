@@ -1,4 +1,4 @@
-import { VehicleDiagnostic, Vehicle, User } from "../models/index.js";
+import { VehicleDiagnostic, Vehicle, User, AutoRepairShop } from "../models/index.js";
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc.js';
 
@@ -65,7 +65,7 @@ export const getVehicleDiagnostics = async (req, res) => {
       order: [['vehicle_diagnostic_id', 'ASC']],
     });
 
-    const filterDeleted = diagnostics.filter((item) => item.is_deleted !== true && item.dtc !== null);
+    const filterDeleted = diagnostics.filter((item) => item.is_deleted !== true && item.vehicle_issue_description === 'No Codes Detected' ? item.vehicle_issue_description : item.dtc !== null);
 
     const diagnosticsWithVehicle = filterDeleted.map((diag) => {
       const d = diag.toJSON();
@@ -83,8 +83,8 @@ export const getVehicleDiagnostics = async (req, res) => {
   }
 };
 
-// GET ONGOING VEHICLE DIAGNOSTICS
-export const getOnVehicleDiagnostic = async (req, res) => {
+// GET ONGOING VEHICLE DIAGNOSTICS (CAR OWNER)
+export const getOnVehicleDiagnosticCO = async (req, res) => {
   const user_id = req.user.user_id;
   const {
     vehicle_id,
@@ -95,6 +95,26 @@ export const getOnVehicleDiagnostic = async (req, res) => {
     const user = await User.findOne({ where: { user_id: user_id } });
 
     if (user) {
+      const onVehicleDiagnostic = await VehicleDiagnostic.findAll({ where: { vehicle_id: vehicle_id, scan_reference: scan_reference } });
+      res.status(200).json(onVehicleDiagnostic);
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+// GET ONGOING VEHICLE DIAGNOSTICS (REPAIR SHOP)
+export const getOnVehicleDiagnosticRS = async (req, res) => {
+  const repair_shop_id = req.user.repair_shop_id;
+  const {
+    vehicle_id,
+    scan_reference
+  } = req.params;
+
+  try {
+    const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
+
+    if (shop) {
       const onVehicleDiagnostic = await VehicleDiagnostic.findAll({ where: { vehicle_id: vehicle_id, scan_reference: scan_reference } });
       res.status(200).json(onVehicleDiagnostic);
     }
@@ -222,6 +242,42 @@ export const countScansToday = async (req, res) => {
 
       const countScansToday = grouped.length;
       res.status(200).json(countScansToday);
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+// GET CAR RECENT SCANS (CAR OWNER)
+export const getRecentScansCO = async (req, res) => {
+  const user_id = req.user.user_id;
+  const { vehicle_id } = req.params;
+
+  try {
+    const user = await User.findOne({ where: { user_id: user_id } });
+
+    if (user) {
+      const diagnostics = await VehicleDiagnostic.findAll({ where: { vehicle_id: vehicle_id, } });
+      const recentScans = diagnostics.filter((item) => item.vehicle_issue_description === 'No Codes Detected' ? item.vehicle_issue_description : item.dtc !== null);
+      res.status(200).json(recentScans);
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
+// GET CAR RECENT SCANS (REPAIR SHOP)
+export const getRecentScansRS = async (req, res) => {
+  const repair_shop_id = req.user.repair_shop_id;
+  const { vehicle_id } = req.params;
+
+  try {
+    const shop = await AutoRepairShop.findOne({ where: { repair_shop_id: repair_shop_id } });
+
+    if (shop) {
+      const diagnostics = await VehicleDiagnostic.findAll({ where: { vehicle_id: vehicle_id, } });
+      const recentScans = diagnostics.filter((item) => item.vehicle_issue_description === 'No Codes Detected' ? item.vehicle_issue_description : item.dtc !== null);
+      res.status(200).json(recentScans);
     }
   } catch (e) {
     res.status(500).json({ error: e.message });
