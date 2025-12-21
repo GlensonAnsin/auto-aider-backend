@@ -625,11 +625,5 @@ For issues, questions, or feature requests:
 
 ---
 
-## 📄 License
-
-[Add your license information here]
-
----
-
 **Last Updated:** December 21, 2025  
 **Version:** 1.0.0
