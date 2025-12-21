@@ -290,7 +290,7 @@ export const resetPassCO = async (req, res) => {
   }
 };
 
-// REFRESH TOKEN
+// REFRESH TOKEN (Not yet implemented)
 export const refreshAccessToken = async (req, res) => {
   const { refreshToken } = req.body;
 
