@@ -17,6 +17,9 @@ import generateOtpRoutes from './src/routes/generateOtpRoutes.js';
 import axios from 'axios';
 import { onlineUsers, onlineShops } from './src/utils/onlineUsers.js';
 import { runPMSScheduler } from './src/utils/pms.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
@@ -101,7 +104,7 @@ io.on('connection', (socket) => {
 
   socket.on('sendMessage', async ({ senderID, receiverID, role, message, sentAt }) => {
     try {
-      await axios.post('https://auto-aider-backend.onrender.com/api/messages/send-message',
+      await axios.post(`${process.env.BACKEND_API_URL}/messages/send-message`,
         {
           senderID,
           receiverID,
@@ -122,7 +125,7 @@ io.on('connection', (socket) => {
 
   socket.on('updateStatus', async ({ chatIDs, status }) => {
     try {
-      await axios.patch('https://auto-aider-backend.onrender.com/api/messages/update-message-status',
+      await axios.patch(`${process.env.BACKEND_API_URL}/messages/update-message-status`,
         {
           chatIDs,
           status,
